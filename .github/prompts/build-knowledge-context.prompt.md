@@ -22,7 +22,9 @@ Help select relevant internal KB notes for a Work Item without loading the entir
 
 ## Instructions
 
-- Prefer `make knowledge-search QUERY="<QUERY>"` or the read-only `salesforce-context` MCP tool `get_related_knowledge`.
+- If no context pack exists for the Work Item yet, call the `build_context_pack` MCP tool with the Work Item ID and query. This builds the context pack and `relevant-knowledge.yaml` without requiring a terminal command.
+- After knowledge import or edit, call `rebuild_knowledge_index` MCP tool to refresh the index before searching.
+- Prefer the `salesforce-context` MCP tool `get_related_knowledge` for search, or `make knowledge-search QUERY="<QUERY>"` if MCP is unavailable.
 - To browse all notes in a domain, use the MCP tool `list_knowledge_domain` with the domain name (e.g. `billing`, `time-expense`).
 - To read a full note after finding it by search, use `get_knowledge_note` with the note path.
 - Treat the external Knowledge Base Git repository as the source of truth and `.ai/knowledge/` as the synchronized local copy.

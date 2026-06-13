@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -17,7 +17,8 @@ def _ensure_min_python() -> None:
         return
     candidate = shutil.which("python3.11")
     if candidate and Path(candidate).resolve() != Path(sys.executable).resolve():
-        os.execv(candidate, [candidate, *sys.argv])
+        result = subprocess.run([candidate, *sys.argv])
+        sys.exit(result.returncode)
 
 
 def _prepare_repo() -> None:
@@ -83,6 +84,11 @@ def main(argv: list[str] | None = None) -> int:
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(json.dumps(config, ensure_ascii=True, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"Wrote {_display_path(config_path, repo_root)}")
+
+    ado_org = config.get("azure_devops", {}).get("organization", "").strip()
+    if ado_org and ado_org != "YOUR_ADO_ORG":
+        _patch_mcp_json(repo_root, ado_org)
+
     print("No passwords, Salesforce tokens, or secrets were requested or stored.")
     print("")
     print("Next steps:")
@@ -159,6 +165,18 @@ def _prompt(label: str, default: str) -> str:
     suffix = f" [{default}]" if default else ""
     value = input(f"{label}{suffix}: ").strip()
     return value if value else default
+
+
+def _patch_mcp_json(repo_root: Path, ado_org: str) -> None:
+    mcp_path = repo_root / ".vscode" / "mcp.json"
+    if not mcp_path.exists():
+        return
+    original = mcp_path.read_text(encoding="utf-8")
+    if "YOUR_ADO_ORG" not in original:
+        return
+    patched = original.replace("YOUR_ADO_ORG", ado_org)
+    mcp_path.write_text(patched, encoding="utf-8")
+    print(f"Updated .vscode/mcp.json with ADO organization: {ado_org}")
 
 
 def _display_path(path: Path, repo_root: Path) -> str:

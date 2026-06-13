@@ -74,6 +74,13 @@ class SalesforceContextServer:
                 str(arguments.get("domain", "")),
                 _int_arg(arguments, "limit", 50),
             )
+        if name == "rebuild_knowledge_index":
+            return self.rebuild_knowledge_index()
+        if name == "build_context_pack":
+            return self.build_context_pack(
+                str(arguments.get("work_item_id", "")),
+                str(arguments.get("query", "")),
+            )
         raise ValueError(f"Unknown tool: {name}")
 
     def search_context(self, query: str, top_k: int = 10) -> dict[str, Any]:
@@ -169,6 +176,44 @@ class SalesforceContextServer:
         return {
             "path": relative.as_posix(),
             "content": _read_limited(note_path, self.repo_root, limit=MAX_CONTENT_CHARS),
+            "warnings": [],
+        }
+
+    def rebuild_knowledge_index(self) -> dict[str, Any]:
+        from ai_workspace.knowledge.index_knowledge import build_knowledge_index
+        from ai_workspace.utils.io import write_jsonl
+        knowledge_root = (self.repo_root / ".ai" / "knowledge").resolve()
+        out_path = self._index_file(INDEX_FILES["knowledge"])
+        records = build_knowledge_index(knowledge_root)
+        write_jsonl(out_path, records)
+        return {
+            "indexed_cards": len(records),
+            "out": out_path.relative_to(self.repo_root).as_posix(),
+            "warnings": [] if records else ["No knowledge notes found under .ai/knowledge/"],
+        }
+
+    def build_context_pack(self, work_item_id: str, query: str) -> dict[str, Any]:
+        self._validate_work_item(work_item_id)
+        if not query or not query.strip():
+            raise ValueError("query is required")
+        from ai_workspace.indexers.build_context_pack import main as build_main
+        work_item_dir = safe_path_join(
+            self.repo_root,
+            f".ai/context/work-items/{work_item_id}",
+            (".ai/context",),
+        )
+        work_item_dir.mkdir(parents=True, exist_ok=True)
+        build_main([
+            "--work-item", work_item_id,
+            "--query", query,
+            "--index-dir", self.index_dir.as_posix(),
+            "--work-item-dir", work_item_dir.as_posix(),
+        ])
+        out_path = work_item_dir / "context-pack.md"
+        return {
+            "work_item_id": work_item_id,
+            "context_pack_path": out_path.relative_to(self.repo_root).as_posix(),
+            "exists": out_path.exists(),
             "warnings": [],
         }
 
@@ -342,6 +387,8 @@ def _tool_definitions() -> list[dict[str, Any]]:
         _tool("get_solution_design", "Read approved or proposed solution design for a Work Item.", {"work_item_id": "string"}, ["work_item_id"]),
         _tool("get_config_impact", "Read local config impact artifacts for a Work Item.", {"work_item_id": "string"}, ["work_item_id"]),
         _tool("list_knowledge_domain", "List all knowledge cards indexed under a specific domain (e.g. 'billing', 'time-expense').", {"domain": "string", "limit": "integer"}, ["domain"]),
+        _tool("rebuild_knowledge_index", "Rebuild the local knowledge card index from .ai/knowledge/ notes. Call this after importing or editing knowledge notes.", {}, []),
+        _tool("build_context_pack", "Build a Work Item context pack by searching all local indexes. Writes context-pack.md and relevant-*.yaml under .ai/context/work-items/<id>/.", {"work_item_id": "string", "query": "string"}, ["work_item_id", "query"]),
     ]
 
 

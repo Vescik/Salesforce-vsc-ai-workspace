@@ -14,6 +14,10 @@ make setup
 make configure
 ```
 
+`make configure` runs interactively and sets your Salesforce org alias, Azure DevOps organization, and Knowledge Base repository URL. It also automatically updates `.vscode/mcp.json` with your ADO organization — no manual placeholder editing required.
+
+**Windows:** Use `.\scripts\workspace.ps1 configure` instead of `make configure`.
+
 3. Authenticate Salesforce:
 
 ```bash
@@ -35,7 +39,7 @@ make knowledge-index
 make ai-context WORK_ITEM=EXAMPLE-WI QUERY="example"
 ```
 
-Before using `/fetch-us`, update the `YOUR_ADO_ORG` placeholder in `.vscode/mcp.json` or your local VS Code MCP settings. `/fetch-us` writes normalized local Work Item artifacts only.
+`/fetch-us` writes normalized local Work Item artifacts only. The Azure DevOps MCP connection uses the organization set in step 2.
 
 Optional Knowledge Base sync:
 

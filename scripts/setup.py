@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
-import os
 import shutil
 from pathlib import Path
 
@@ -14,7 +14,8 @@ def _ensure_min_python() -> None:
         return
     candidate = shutil.which("python3.11")
     if candidate and Path(candidate).resolve() != Path(sys.executable).resolve():
-        os.execv(candidate, [candidate, *sys.argv])
+        result = subprocess.run([candidate, *sys.argv])
+        sys.exit(result.returncode)
 
 
 def _prepare_repo() -> None:

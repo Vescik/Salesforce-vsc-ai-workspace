@@ -2,6 +2,7 @@
 name: sync-knowledge
 description: Sync curated internal Knowledge Base notes from the external source repository.
 agent: knowledge-curator
+mode: agent
 argument-hint: <KB_REPO_URL_OR_LOCAL_PATH>
 ---
 
@@ -28,17 +29,9 @@ make knowledge-sync-dry-run KB_REPO=<repo-url-or-local-path>
 make knowledge-sync KB_REPO=<repo-url-or-local-path>
 ```
 
-- Rebuild the index:
+- After sync completes, call the `rebuild_knowledge_index` MCP tool to refresh the knowledge card index without requiring a separate terminal command.
 
-```bash
-make knowledge-index
-```
-
-- Rebuild the Work Item context pack:
-
-```bash
-make ai-context WORK_ITEM=<WORK_ITEM_ID> QUERY="<business topic>"
-```
+- If a Work Item context pack needs updating, call the `build_context_pack` MCP tool with the Work Item ID and query topic.
 
 ## Rules
 
