@@ -1,0 +1,67 @@
+version: 1
+description: "Routing map for Azure Wiki documentation placement."
+
+modules:
+  engagement_manager:
+    display_name: "Engagement Manager"
+    candidate_paths:
+      - "/Engagement-Manager"
+      - "/Modules/Engagement-Manager"
+    keywords:
+      - "engagement"
+      - "project"
+      - "manager"
+      - "assignment"
+    related_objects: []
+  invoicing_billing:
+    display_name: "Invoicing / Billing"
+    candidate_paths:
+      - "/Invoicing"
+      - "/Billing"
+      - "/Finance/Invoicing"
+      - "/Modules/Invoicing-Billing"
+    keywords:
+      - "invoice"
+      - "invoicing"
+      - "billing"
+      - "rate"
+      - "revenue"
+      - "finance"
+    related_objects: []
+  timesheets:
+    display_name: "Timesheets"
+    candidate_paths:
+      - "/Timesheets"
+      - "/Time"
+      - "/Modules/Timesheets"
+    keywords:
+      - "timesheet"
+      - "time entry"
+      - "approval"
+    related_objects: []
+  expenses:
+    display_name: "Expenses"
+    candidate_paths:
+      - "/Expenses"
+      - "/Modules/Expenses"
+    keywords:
+      - "expense"
+      - "claim"
+      - "reimbursement"
+    related_objects: []
+  resource_management:
+    display_name: "Resource Management"
+    candidate_paths:
+      - "/Resource-Management"
+      - "/Resources"
+      - "/Modules/Resource-Management"
+    keywords:
+      - "resource"
+      - "allocation"
+      - "capacity"
+      - "forecast"
+    related_objects: []
+
+fallback:
+  proposed_root: "/_Proposed"
+  unclassified_root: "/_Unclassified"

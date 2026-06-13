@@ -1,0 +1,30 @@
+version: 1
+default_action: "allow_anonymized"
+blocked_fields:
+  - Id
+  - OwnerId
+  - CreatedById
+  - LastModifiedById
+  - SystemModstamp
+field_name_rules:
+  redact:
+    - ".*Email.*"
+    - ".*Phone.*"
+    - ".*Address.*"
+    - ".*Token.*"
+    - ".*Secret.*"
+    - ".*Password.*"
+  bucketize:
+    - ".*Amount.*"
+    - ".*Rate.*"
+    - ".*Cost.*"
+    - ".*Price.*"
+    - ".*Revenue.*"
+    - ".*Margin.*"
+  summarize:
+    - ".*Description.*"
+    - ".*Notes.*"
+    - ".*Comment.*"
+limits:
+  max_string_length: 500
+  max_records_per_object_default: 500

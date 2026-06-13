@@ -1,0 +1,42 @@
+version: 1
+description: "Policy for Azure DevOps Wiki draft publication."
+
+approval:
+  require_human_approval: true
+  default_mode: "dry_run"
+  allowed_publish_modes:
+    - "dry_run"
+    - "prepare_branch"
+    - "push_branch_after_approval"
+  forbidden:
+    - "direct_push_to_default_branch"
+    - "auto_merge"
+    - "auto_create_pr_without_user_review"
+    - "overwrite_existing_page_without_review"
+
+source_documents:
+  allowed_roots:
+    - "docs/architecture"
+    - "docs/qa-how-to-test"
+    - "specs/approved"
+    - "specs/proposed"
+    - ".ai/outputs/pre-promote"
+    - ".ai/context/work-items"
+  blocked_roots:
+    - ".ai/knowledge/imports"
+    - ".ai/vendor"
+    - ".env"
+    - ".sf"
+    - ".sfdx"
+
+wiki:
+  default_proposed_root: "_Proposed"
+  default_unclassified_root: "_Unclassified"
+  update_order_files: true
+  create_missing_module_index: false
+
+safety:
+  scan_for_secrets: true
+  fail_on_secret_like_values: true
+  mark_ai_drafts: true
+  require_source_artifact_references: true

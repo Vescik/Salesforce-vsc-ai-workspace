@@ -1,0 +1,19 @@
+version: 1
+description: "Branch mapping placeholders for DevOps Center pipeline."
+
+devops_center:
+  official_metadata_promotion: true
+  work_item_branches_managed_by_devops_center: true
+
+branches:
+  work_item_branch_pattern: "<DEVOPS_CENTER_WORK_ITEM_BRANCH>"
+  uat_branch: "<UAT_BRANCH>"
+  stage_branch: "<STAGE_BRANCH>"
+  prod_branch: "<PROD_BRANCH>"
+
+rules:
+  - "Do not invent branch names in prompts or tooling."
+  - "Read actual branch names from DevOps Center/team configuration."
+  - "Do not merge directly to environment branches unless the team process allows it."
+  - "AI workspace may validate and document changes but must not replace DevOps Center."
+  - "IntDev is not Git-managed and is not the source of truth."

@@ -1,0 +1,62 @@
+name: Validate Work Item
+
+on:
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  precheck:
+    name: Local Work Item precheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}" --depth=1 || \
+            git fetch origin "${{ github.base_ref }}" --depth=1
+
+      - name: Check Python imports
+        run: make ai-check-python
+
+      - name: Infer Work Item ID
+        id: infer
+        shell: bash
+        run: |
+          set -euo pipefail
+          title="${{ github.event.pull_request.title }}"
+          branch="${{ github.head_ref }}"
+          work_item="$(printf '%s\n%s\n' "$title" "$branch" | grep -Eio '[A-Z]+-[0-9]+' | head -n 1 || true)"
+          if [ -z "$work_item" ]; then
+            echo "::warning::Could not infer Work Item ID from PR title or branch; defaulting to EXAMPLE-WI for non-blocking local precheck."
+            work_item="EXAMPLE-WI"
+          fi
+          echo "work_item=$work_item" >> "$GITHUB_OUTPUT"
+          echo "Inferred Work Item: $work_item"
+
+      - name: Run Work Item precheck
+        run: |
+          make wi-precheck \
+            WORK_ITEM="${{ steps.infer.outputs.work_item }}" \
+            BASE_REF="origin/${{ github.base_ref }}"
+
+      - name: Upload precheck artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: work-item-precheck
+          path: .ai/outputs/precheck/
+          if-no-files-found: ignore

@@ -1,0 +1,42 @@
+# Registry of configuration-like Salesforce/KimbleOne objects allowed for AI context indexing.
+# Placeholder examples only. These names are not confirmed KimbleOne/Kantata objects.
+#
+# Category guidance:
+# - configuration: setup records that control application behavior and are safe for anonymized AI context when explicitly enabled.
+# - financial_configuration: configuration that may influence financial calculations; use tighter review and masking.
+# - reference_data: stable reference values that are not transactional facts.
+# - transactional: business transaction records; keep disabled unless explicitly approved for anonymized indexing.
+# - unknown: unclassified objects; keep disabled until reviewed.
+
+version: 1
+description: "Registry of configuration-like Salesforce/KimbleOne objects allowed for AI context indexing."
+defaults:
+  index_records: false
+  ai_visibility: "schema_only"
+  max_records: 500
+  exclude_fields:
+    - Id
+    - OwnerId
+    - CreatedById
+    - CreatedDate
+    - LastModifiedById
+    - LastModifiedDate
+    - SystemModstamp
+objects:
+  Example_Config_Object__c:
+    enabled: false
+    category: "configuration"
+    index_records: true
+    ai_visibility: "anonymized_records"
+    external_key:
+      - DeveloperName
+    include_fields:
+      - DeveloperName
+      - MasterLabel
+      - IsActive__c
+      - Related_Config__c
+    exclude_fields: []
+    where: "IsDeleted = false"
+    order_by:
+      - DeveloperName
+    max_records: 200

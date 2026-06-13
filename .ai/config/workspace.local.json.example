@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "workspace": {
+    "name": "salesforce-ai-workspace",
+    "description": "Local employee configuration for the Copilot-only Salesforce AI Workspace"
+  },
+  "paths": {
+    "repo_root": ".",
+    "ai_root": ".ai",
+    "python_tools_root": ".ai/skills/python",
+    "context_root": ".ai/context",
+    "context_index_dir": ".ai/context/index",
+    "work_items_dir": ".ai/context/work-items",
+    "outputs_dir": ".ai/outputs",
+    "knowledge_root": ".ai/knowledge",
+    "knowledge_vendor_dir": ".ai/vendor/knowledge-base",
+    "specs_proposed_dir": "specs/proposed",
+    "specs_approved_dir": "specs/approved",
+    "qa_docs_dir": "docs/qa-how-to-test",
+    "architecture_docs_dir": "docs/architecture"
+  },
+  "salesforce": {
+    "default_dev_org_alias": "IntDev",
+    "validation_org_alias": "",
+    "login_url": "https://login.salesforce.com",
+    "use_devops_center": true,
+    "devops_center_is_official_metadata_promotion": true
+  },
+  "knowledge_base": {
+    "enabled": false,
+    "repo_url": "",
+    "branch": "main",
+    "sync_on_setup": false
+  },
+  "azure_devops": {
+    "enabled": true,
+    "organization": "YOUR_ADO_ORG",
+    "default_project": "",
+    "mcp_server_name": "ado-remote-mcp"
+  },
+  "azure_wiki": {
+    "enabled": false,
+    "repo_url": "",
+    "branch": "main",
+    "vendor_dir": ".ai/vendor/azure-wiki",
+    "default_draft_branch_prefix": "docs/ai-wiki",
+    "default_proposed_root": "_Proposed",
+    "require_human_approval": true,
+    "allow_direct_push_to_default_branch": false,
+    "push_enabled": false
+  },
+  "python": {
+    "min_version": "3.11",
+    "use_venv": true,
+    "venv_path": ".venv"
+  },
+  "node": {
+    "required": false,
+    "min_version": ""
+  },
+  "salesforce_cli": {
+    "required": true,
+    "command": "sf"
+  },
+  "github": {
+    "requires_git": true,
+    "requires_github_cli": false
+  },
+  "security": {
+    "allow_salesforce_writes": false,
+    "allow_config_apply": false,
+    "allow_external_llm_apis": false,
+    "allow_arbitrary_mcp_file_reads": false
+  }
+}

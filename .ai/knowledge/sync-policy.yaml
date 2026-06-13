@@ -1,0 +1,53 @@
+version: 1
+description: "Policy for syncing external internal knowledge repository into local workspace."
+
+source:
+  repo_url_env_or_make_var: "KB_REPO"
+  default_branch: "main"
+  local_vendor_dir: ".ai/vendor/knowledge-base"
+
+copy_rules:
+  include:
+    - "README.md"
+    - "index.yaml"
+    - "domains/*.md"
+    - "domains/**/*.md"
+    - "object-notes/*.md"
+    - "object-notes/**/*.md"
+    - "process-maps/*.md"
+    - "process-maps/**/*.md"
+    - "decisions/*.md"
+    - "decisions/**/*.md"
+    - "governance/*.md"
+    - "governance/**/*.md"
+  exclude:
+    - "imports/**"
+    - "archive/**"
+    - "**/*.pdf"
+    - "**/*.docx"
+    - "**/*.xlsx"
+    - "**/*.png"
+    - "**/*.jpg"
+    - "**/*.jpeg"
+    - "**/*.zip"
+    - ".env"
+    - ".env.*"
+    - "**/.env"
+    - "**/.env.*"
+    - "secrets/**"
+    - "**/secrets/**"
+    - ".git/**"
+
+destination:
+  root: ".ai/knowledge"
+  overwrite_curated_files: true
+  preserve_local_files:
+    - ".ai/knowledge/sync-policy.yaml"
+    - ".ai/knowledge/sync-state.json"
+
+safety:
+  reject_large_file_mb: 2
+  reject_binary_files: true
+  scan_for_secret_like_values: true
+  fail_on_secret_like_values: false
+  warn_on_missing_front_matter: true

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Salesforce AI Workspace Runbook</title>
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Copilot-only local AI-assisted development workspace</p>
+        <h1>Salesforce AI Workspace</h1>
+        <p class="lead">Assists, validates, documents - does not deploy.</p>
+      </div>
+      <div class="hero-panel" aria-label="Safety summary">
+        <span>No external LLM APIs</span>
+        <span>No Salesforce writes</span>
+        <span>No config apply</span>
+        <span>DevOps Center promotes</span>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="Page sections">
+      <a href="#process">Process</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#data-flow">Data Flow</a>
+      <a href="#knowledge">Knowledge</a>
+      <a href="#config">Config</a>
+      <a href="#wiki">Wiki</a>
+      <a href="#agents">Agents</a>
+      <a href="#safety">Safety</a>
+      <a href="#quickstart">Quick Start</a>
+    </nav>
+
+    <main>
+      <section id="process" class="section">
+        <h2>Developer Process Map</h2>
+        <div class="flow-grid">
+          <div class="step">Work Item</div>
+          <div class="step">Context Build</div>
+          <div class="step">Solution Design</div>
+          <div class="step">Development</div>
+          <div class="step">Precheck</div>
+          <div class="step">QA Docs</div>
+          <div class="step">Release Readiness</div>
+          <div class="step official">DevOps Center Promote</div>
+          <div class="step">Azure Wiki Docs</div>
+        </div>
+      </section>
+
+      <section id="architecture" class="section">
+        <h2>Workspace Architecture</h2>
+        <div class="diagram architecture">
+          <div class="node primary">VS Code + Copilot</div>
+          <div class="node">Prompt Files</div>
+          <div class="node">Custom Agents</div>
+          <div class="node">Python Tools</div>
+          <div class="node">Read-only MCP</div>
+          <div class="node">Salesforce CLI</div>
+          <div class="node">Knowledge Base Repo</div>
+          <div class="node">Azure Wiki Repo</div>
+          <div class="node">GitHub Actions</div>
+          <div class="node official">DevOps Center</div>
+        </div>
+        <p class="note">The workspace prepares evidence and drafts. DevOps Center remains the official Salesforce metadata promotion mechanism.</p>
+      </section>
+
+      <section id="data-flow" class="section">
+        <h2>Context Data Flow</h2>
+        <svg class="svg-diagram" viewBox="0 0 1120 430" role="img" aria-label="Data flow from source evidence to context pack and outputs">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z"></path>
+            </marker>
+          </defs>
+          <g class="source">
+            <rect x="30" y="40" width="180" height="56" rx="8"></rect><text x="120" y="74">ADO Work Item</text>
+            <rect x="30" y="120" width="180" height="56" rx="8"></rect><text x="120" y="154">Repo Metadata</text>
+            <rect x="30" y="200" width="180" height="56" rx="8"></rect><text x="120" y="234">Salesforce Schema</text>
+            <rect x="30" y="280" width="180" height="56" rx="8"></rect><text x="120" y="314">Config Records</text>
+            <rect x="30" y="360" width="180" height="56" rx="8"></rect><text x="120" y="394">Knowledge Base</text>
+          </g>
+          <rect class="hub" x="420" y="170" width="220" height="90" rx="10"></rect><text x="530" y="210">Indexes / Cards</text><text x="530" y="235">JSONL context helpers</text>
+          <rect class="hub" x="780" y="170" width="220" height="90" rx="10"></rect><text x="890" y="210">Context Pack</text><text x="890" y="235">Work Item evidence</text>
+          <rect class="output" x="780" y="310" width="220" height="70" rx="10"></rect><text x="890" y="348">Design, Docs, QA, Wiki</text>
+          <path d="M210 68 C310 68 330 190 420 200" marker-end="url(#arrow)"></path>
+          <path d="M210 148 C300 148 330 205 420 210" marker-end="url(#arrow)"></path>
+          <path d="M210 228 C300 228 330 220 420 220" marker-end="url(#arrow)"></path>
+          <path d="M210 308 C310 308 330 240 420 230" marker-end="url(#arrow)"></path>
+          <path d="M210 388 C320 388 330 250 420 240" marker-end="url(#arrow)"></path>
+          <path d="M640 215 L780 215" marker-end="url(#arrow)"></path>
+          <path d="M890 260 L890 310" marker-end="url(#arrow)"></path>
+        </svg>
+      </section>
+
+      <section id="knowledge" class="section split">
+        <div>
+          <h2>Knowledge Base Flow</h2>
+          <ol class="compact">
+            <li>Curated notes live in a separate private Git repository.</li>
+            <li>`make knowledge-sync` copies reviewed notes into `.ai/knowledge/`.</li>
+            <li>`make knowledge-index` writes `knowledge-cards.jsonl`.</li>
+            <li>Context packs include selected cards as supporting evidence.</li>
+          </ol>
+        </div>
+        <div class="lane">
+          <span>External KB repo</span>
+          <span>Sync</span>
+          <span>.ai/knowledge</span>
+          <span>knowledge-cards.jsonl</span>
+          <span>Context pack</span>
+        </div>
+      </section>
+
+      <section id="config" class="section split">
+        <div>
+          <h2>Config Record Flow</h2>
+          <p>Config records are separate from Salesforce metadata. The workspace can analyze controlled, masked config cards and create review skeletons, but no config apply is implemented.</p>
+        </div>
+        <div class="lane warning">
+          <span>Config registry</span>
+          <span>Config index</span>
+          <span>Impact report</span>
+          <span>Pack skeleton</span>
+          <span>Manual approval</span>
+          <span>No apply</span>
+        </div>
+      </section>
+
+      <section id="wiki" class="section split">
+        <div>
+          <h2>Azure Wiki Publication Flow</h2>
+          <p>Wiki publication is draft-first: scan, place, preview, review, prepare branch, then push only after explicit human approval.</p>
+        </div>
+        <div class="lane">
+          <span>Docs generated</span>
+          <span>Wiki scanned</span>
+          <span>Placement decision</span>
+          <span>Dry run</span>
+          <span>Human review</span>
+          <span>Draft branch</span>
+          <span>PR / manual merge</span>
+        </div>
+      </section>
+
+      <section id="agents" class="section">
+        <h2>Agent Map</h2>
+        <div class="agent-grid">
+          <div><h3>Solution Design</h3><p>Solution Architect, Design Reviewer, Implementation Planner.</p></div>
+          <div><h3>Knowledge</h3><p>Knowledge Curator and Knowledge Base prompts.</p></div>
+          <div><h3>Config</h3><p>Config impact and config delta planning prompts.</p></div>
+          <div><h3>QA / Docs</h3><p>QA How-to-Test Writer and Technical Documentation Writer.</p></div>
+          <div><h3>Release</h3><p>Release Readiness Reviewer and pre-promote prompts.</p></div>
+          <div><h3>Workspace</h3><p>Setup, doctor, local indexers, MCP, GitHub checks, and docs pack.</p></div>
+        </div>
+      </section>
+
+      <section id="safety" class="section">
+        <h2>Safety Model</h2>
+        <div class="safety-grid">
+          <span>No external LLM API</span>
+          <span>No deploy</span>
+          <span>No config apply</span>
+          <span>No Salesforce writes</span>
+          <span>No secrets in repo</span>
+          <span>Human approval required</span>
+        </div>
+      </section>
+
+      <section id="quickstart" class="section">
+        <h2>Quick Start Commands</h2>
+        <pre><code>make setup
+make configure
+make doctor
+make ai-index-repo
+make knowledge-index
+make ai-context WORK_ITEM=KIM-1234 QUERY="invoice approval"</code></pre>
+      </section>
+    </main>
+  </body>
+</html>

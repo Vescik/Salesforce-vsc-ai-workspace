@@ -1,0 +1,50 @@
+version: 1
+description: "Environment map for Salesforce AI Workspace and DevOps Center flow."
+
+environments:
+  intdev:
+    role: "developer_discovery_org"
+    sandbox_type: "full_copy"
+    git_managed: false
+    source_of_truth: false
+    allowed_ai_workspace_actions:
+      - "schema_index"
+      - "repo_context_build"
+      - "config_record_index"
+      - "context_pack_build"
+      - "solution_design_support"
+      - "precheck"
+    blocked_actions:
+      - "metadata_promotion"
+      - "production_deployment"
+      - "config_record_apply"
+    notes:
+      - "IntDev is used for discovery/development but is not Git source of truth."
+      - "Use IntDev for curated discovery context only; do not treat it as deployment authority."
+
+  uat:
+    role: "devops_center_pipeline_environment"
+    sandbox_type: "full_copy"
+    git_managed: true
+    source_of_truth: false
+    branch_placeholder: "<UAT_BRANCH>"
+    notes:
+      - "Actual branch mapping must come from DevOps Center/team configuration."
+
+  stage:
+    role: "devops_center_pipeline_environment"
+    sandbox_type: "full_copy"
+    git_managed: true
+    source_of_truth: false
+    branch_placeholder: "<STAGE_BRANCH>"
+    notes:
+      - "Actual branch mapping must come from DevOps Center/team configuration."
+
+  prod:
+    role: "production"
+    git_managed: true
+    source_of_truth: true
+    branch_placeholder: "<PROD_BRANCH>"
+    notes:
+      - "Production metadata promotion is through DevOps Center."
+      - "Production config apply is not implemented in this workspace and requires future controlled tooling/manual approval."

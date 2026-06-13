@@ -1,0 +1,35 @@
+packet_id: "<PACKET_ID>"
+work_item: "<WORK_ITEM_ID>"
+title: "<PACKET_TITLE>"
+type: "<context_analysis|metadata_change|config_impact|tests|documentation|qa_how_to_test|deployment_precheck>"
+status: "<proposed|ready|blocked|done>"
+objective: "<ONE_OBJECTIVE>"
+source_artifacts:
+  - "<SOURCE_ARTIFACT_PATH>"
+inputs:
+  - "<INPUT_ARTIFACT_OR_CONTEXT>"
+allowed_changes:
+  - "<ALLOWED_FILE_OR_COMPONENT_TYPE>"
+blocked_changes:
+  - "<BLOCKED_FILE_OR_COMPONENT_TYPE>"
+acceptance_criteria:
+  - id: "AC-1"
+    text: "<AC_TEXT>"
+definition_of_done:
+  - "<DONE_CRITERION>"
+validation_steps:
+  - "<VALIDATION_STEP>"
+review_notes:
+  - "<REVIEW_NOTE>"
+dependencies:
+  - "<DEPENDENCY_OR_NONE>"
+output_artifacts:
+  - "<EXPECTED_OUTPUT_ARTIFACT_PATH>"
+supported_packet_types:
+  - "context_analysis"
+  - "metadata_change"
+  - "config_impact"
+  - "tests"
+  - "documentation"
+  - "qa_how_to_test"
+  - "deployment_precheck"

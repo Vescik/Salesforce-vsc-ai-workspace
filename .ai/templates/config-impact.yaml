@@ -1,0 +1,24 @@
+work_item: "<WORK_ITEM_ID>"
+status: "<none|identified|reviewed|approved|blocked>"
+config_impact_required: "<true|false|unknown>"
+impacted_config_objects:
+  - object_api_name: "<CONFIG_OBJECT_API_NAME>"
+    purpose: "<CONFIG_OBJECT_PURPOSE>"
+    evidence: "<EVIDENCE_SOURCE>"
+impacted_config_records:
+  - object_api_name: "<CONFIG_OBJECT_API_NAME>"
+    external_key: "<CONFIG_RECORD_EXTERNAL_KEY>"
+    action: "<create|update|deactivate|no_change|unknown>"
+    related_acceptance_criteria:
+      - "AC-1"
+config_pack_required: "<true|false|unknown>"
+config_pack_name: "<CONFIG_PACK_NAME>"
+promotion_strategy: "<manual|future_automation|not_required|unknown>"
+source_org: "<SOURCE_ORG>"
+target_environments:
+  - "<TARGET_ENVIRONMENT>"
+risks:
+  - "<RISK>"
+open_questions:
+  - "<OPEN_QUESTION>"
+approval_required: "<true|false|unknown>"

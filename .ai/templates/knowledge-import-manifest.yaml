@@ -1,0 +1,19 @@
+version: 1
+import_batch: "EXAMPLE-BATCH"
+description: "Example import manifest for internal managed package knowledge."
+default_domain: "general"
+default_owner: "Salesforce Platform Team"
+default_confidence: "low"
+default_status: "draft"
+files:
+  - path: ".ai/knowledge/imports/example.txt"
+    domain: "general"
+    title: "Example imported knowledge"
+    owner: "Salesforce Platform Team"
+    tags:
+      - "example"
+      - "managed-package"
+    related_objects: []
+    related_config_objects: []
+    related_processes: []
+    enabled: false

@@ -1,0 +1,24 @@
+version: 1
+description: "Local synchronized internal managed package knowledge index."
+source_of_truth: "external_git_repository"
+source_repo_url: ""
+last_synced: null
+
+domains:
+  general:
+    description: "General internal managed package knowledge."
+    owner: "Salesforce Platform Team"
+    files: []
+    keywords:
+      - "KimbleOne"
+      - "Kantata"
+      - "managed package"
+
+rules:
+  - "Knowledge notes are internal documentation, not global instructions."
+  - "The external Knowledge Base repository is the source of truth."
+  - "Do not load the entire KB for every task."
+  - "Use knowledge-cards.jsonl and context packs."
+  - "Claims based on KB should reference source file path."
+  - "Draft or low-confidence notes require human validation."
+  - "If KB conflicts with Salesforce schema/config records, mark conflict for human validation."

@@ -1,0 +1,41 @@
+version: 1
+description: "Human-readable release gates for the Copilot-only Salesforce AI Workspace."
+
+gates:
+  local_precheck:
+    timing: "before commit or PR"
+    required_artifacts:
+      - "context-pack.md"
+      - "solution-design.md"
+      - "config-impact.yaml if relevant"
+    checks:
+      - "metadata scope"
+      - "hardcoded Salesforce ID candidates"
+      - "raw/exported data risk"
+      - "required documentation draft"
+  pre_merge:
+    timing: "before merge/review completion"
+    checks:
+      - "GitHub Actions validation"
+      - "Salesforce deploy validate if configured"
+      - "human review"
+  pre_promote:
+    timing: "before DevOps Center promote"
+    checks:
+      - "pre-promote report"
+      - "metadata change summary"
+      - "config impact decision"
+      - "QA readiness"
+    optional_artifacts:
+      - "rollback-impact-analysis (recommended for L/XL Work Items or when config sidecar or destructive metadata changes are involved)"
+  post_promote:
+    timing: "after DevOps Center promote"
+    checks:
+      - "environment smoke test"
+      - "QA how-to-test execution"
+      - "config sidecar follow-up if required"
+
+rules:
+  - "DevOps Center is the official Salesforce metadata promotion mechanism."
+  - "Config record promotion is a separate sidecar process and is currently analysis/skeleton only."
+  - "Production config apply is not implemented and requires future controlled tooling/manual approval."

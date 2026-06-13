@@ -1,0 +1,21 @@
+# Salesforce CLI source tracking ignores.
+# This project uses DevOps Center for metadata promotion; these ignores do not
+# define a deployment process.
+
+package.xml
+
+# LWC configuration files
+**/jsconfig.json
+**/.eslintrc.json
+
+# LWC Jest
+**/__tests__/**
+
+# Copilot-only AI workspace files are local context, documentation, and tooling.
+.ai/**
+.github/**
+.vscode/**
+docs/**
+specs/**
+config/data-promotion/**
+config/kimbleone-packs/**
