@@ -95,12 +95,14 @@ help:
 	@echo "  DevOps Center remains the metadata promotion mechanism; these commands do not deploy."
 
 setup:
+	$(PYTHON) -m pip install -e . --quiet
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.configuration.bootstrap \
 		--config "$(WORKSPACE_CONFIG)" \
 		--create-local-config \
 		--print-next-steps
 
 setup-venv:
+	$(PYTHON) -m pip install -e . --quiet
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.configuration.bootstrap \
 		--config "$(WORKSPACE_CONFIG)" \
 		--create-local-config \

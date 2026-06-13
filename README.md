@@ -30,18 +30,23 @@
 
 **1. Install prerequisites:** Python 3.11+, Git, Salesforce CLI (`sf`), VS Code + GitHub Copilot
 
-**2. Clone and set up:**
+**2. Clone, install, and set up:**
 ```bash
 git clone <repo-url> && cd <repo-folder>
+pip install -e .    # installs ai_workspace package (zero external deps)
 make setup
 make configure      # interactive: sets your org alias, ADO org, KB URL
 ```
 
 **Windows:**
 ```powershell
+git clone <repo-url>; cd <repo-folder>
+pip install -e .
 .\scripts\workspace.ps1 setup
 .\scripts\workspace.ps1 configure
 ```
+
+> `make setup` / `.\scripts\workspace.ps1 setup` also run `pip install -e .` automatically.
 
 **3. Authenticate Salesforce:**
 ```bash

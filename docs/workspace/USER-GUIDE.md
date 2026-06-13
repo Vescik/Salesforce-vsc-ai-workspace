@@ -106,7 +106,24 @@ git clone <your-workspace-repo-url>
 cd <repo-folder>
 ```
 
-### Step 2 — Run Setup
+### Step 2 — Install the Package
+
+Registers the `ai_workspace` Python package in your Python environment so all commands work without manually setting `PYTHONPATH`. The package has **zero external dependencies** — no packages are downloaded from PyPI.
+
+```bash
+pip install -e .
+```
+
+**Windows:**
+```powershell
+pip install -e .
+```
+
+This is a one-time step per Python environment. After this, you can run any `ai_workspace` module directly (e.g., `python -m ai_workspace.mcp.salesforce_context_mcp`).
+
+> ℹ️ `make setup` and `.\scripts\workspace.ps1 setup` run `pip install -e .` automatically, so you only need this step if you are setting up without using those commands.
+
+### Step 3 — Run Setup (includes pip install automatically)
 
 Creates the required directory structure and generates a local configuration file from the example template.
 
@@ -123,7 +140,7 @@ make setup
 - `.ai/config/workspace.local.json` (gitignored, your local settings)
 - Required context directories under `.ai/context/`
 
-### Step 3 — Configure Local Values
+### Step 4 — Configure Local Values
 
 Runs an interactive prompt to set your org alias, Azure DevOps organization, and (optionally) Knowledge Base repository URL. Also automatically updates `.vscode/mcp.json` with your ADO organization.
 
@@ -146,7 +163,7 @@ make configure
 
 > ℹ️ No passwords, tokens, or credentials are stored. Salesforce authentication is handled by Salesforce CLI separately.
 
-### Step 4 — Authenticate Salesforce
+### Step 5 — Authenticate Salesforce
 
 ```bash
 sf org login web --alias IntDev
@@ -154,7 +171,7 @@ sf org login web --alias IntDev
 
 Replace `IntDev` with the alias you set in step 3.
 
-### Step 5 — Verify Setup
+### Step 6 — Verify Setup
 
 ```bash
 make doctor
@@ -172,7 +189,7 @@ The doctor check reports:
 - Knowledge Base configuration status
 - Any warnings or errors
 
-### Step 6 — Build the First Index
+### Step 7 — Build the First Index
 
 Scans your repository and creates a local metadata component index. No Salesforce org connection required.
 
@@ -188,7 +205,7 @@ make ai-index-repo
 **What it creates:**
 - `.ai/context/index/metadata-components.jsonl` — one card per Apex class, trigger, Flow, LWC, Permission Set, etc.
 
-### Step 7 — (Optional) Index the Knowledge Base
+### Step 8 — (Optional) Index the Knowledge Base
 
 If you have a Knowledge Base repository configured:
 
@@ -197,7 +214,7 @@ make knowledge-sync KB_REPO=https://github.com/your-org/knowledge-base.git
 make knowledge-index
 ```
 
-### Step 8 — Open in VS Code
+### Step 9 — Open in VS Code
 
 ```bash
 code .

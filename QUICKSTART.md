@@ -7,16 +7,26 @@
    - VS Code with GitHub Copilot access
    - Azure DevOps access for read-only Work Item retrieval
 
-2. Set up local config:
+2. Install the workspace package and set up local config:
 
 ```bash
+pip install -e .
 make setup
 make configure
 ```
 
-`make configure` runs interactively and sets your Salesforce org alias, Azure DevOps organization, and Knowledge Base repository URL. It also automatically updates `.vscode/mcp.json` with your ADO organization — no manual placeholder editing required.
+- `pip install -e .` registers the `ai_workspace` package in your Python environment (zero external dependencies — no downloads). This makes all commands work without manually setting `PYTHONPATH`.
+- `make setup` creates the required directories and config file.
+- `make configure` sets your Salesforce org alias, Azure DevOps organization, and Knowledge Base URL, and auto-updates `.vscode/mcp.json`.
 
-**Windows:** Use `.\scripts\workspace.ps1 configure` instead of `make configure`.
+**Windows (PowerShell):**
+```powershell
+pip install -e .
+.\scripts\workspace.ps1 setup
+.\scripts\workspace.ps1 configure
+```
+
+> ℹ️ `make setup` and `.\scripts\workspace.ps1 setup` run `pip install -e .` automatically — if you use these commands you don't need to run pip manually.
 
 3. Authenticate Salesforce:
 

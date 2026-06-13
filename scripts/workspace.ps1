@@ -151,22 +151,26 @@ function Invoke-Help {
 }
 
 function Invoke-Setup {
-    Invoke-Py @(
-        "-m", "ai_workspace.configuration.bootstrap",
-        "--config", $WorkspaceConfig,
-        "--create-local-config",
-        "--print-next-steps"
-    )
+    & $script:PythonCmd -m pip install -e . --quiet
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:PYTHONPATH = $script:PythonPathVal
+    & $script:PythonCmd -m ai_workspace.configuration.bootstrap `
+        --config $WorkspaceConfig `
+        --create-local-config `
+        --print-next-steps
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 function Invoke-SetupVenv {
-    Invoke-Py @(
-        "-m", "ai_workspace.configuration.bootstrap",
-        "--config", $WorkspaceConfig,
-        "--create-local-config",
-        "--create-venv",
-        "--print-next-steps"
-    )
+    & $script:PythonCmd -m pip install -e . --quiet
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $env:PYTHONPATH = $script:PythonPathVal
+    & $script:PythonCmd -m ai_workspace.configuration.bootstrap `
+        --config $WorkspaceConfig `
+        --create-local-config `
+        --create-venv `
+        --print-next-steps
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 function Invoke-Configure {
