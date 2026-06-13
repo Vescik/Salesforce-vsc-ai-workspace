@@ -98,7 +98,7 @@ def parse_knowledge_note(path: Path, knowledge_root: Path, max_excerpt_chars: in
         "related_processes": _list_value(metadata.get("related_processes")),
         "headings": headings,
         "summary": summary,
-        "content_excerpt": normalize_whitespace(body)[:max_excerpt_chars],
+        "content_excerpt": _section_aware_excerpt(body, max_excerpt_chars),
         "checksum": hashlib.sha256(normalize_whitespace(text).encode("utf-8")).hexdigest(),
         "risk_flags": _risk_flags(metadata, body, has_front_matter),
     }
@@ -155,6 +155,33 @@ def _risk_flags(metadata: dict[str, Any], body: str, has_front_matter: bool) -> 
     return sorted(flags)
 
 
+def _section_aware_excerpt(body: str, max_chars: int) -> str:
+    """Return up to max_chars covering the preamble + first N chars of each heading section."""
+    normalized = normalize_whitespace(body)
+    if len(normalized) <= max_chars:
+        return normalized
+    section_re = re.compile(r"(?m)^(#{1,2} .+)$")
+    parts = section_re.split(normalized)
+    result: list[str] = []
+    budget = max_chars
+    preamble = parts[0].strip()
+    if preamble:
+        chunk = preamble[:budget]
+        result.append(chunk)
+        budget -= len(chunk)
+    section_preview = 400
+    for i in range(1, len(parts) - 1, 2):
+        if budget <= 0:
+            break
+        heading = parts[i].strip()
+        content = parts[i + 1].strip() if i + 1 < len(parts) else ""
+        section_text = f"\n{heading}\n{content[:section_preview]}"
+        chunk = section_text[:budget]
+        result.append(chunk)
+        budget -= len(chunk)
+    return "\n".join(result).strip()
+
+
 def _knowledge_markdown_files(knowledge_root: Path) -> list[Path]:
     return [
         path
@@ -170,7 +197,7 @@ def _stale_review(value: str) -> bool:
         reviewed = date.fromisoformat(value[:10])
     except ValueError:
         return True
-    return (datetime.now(timezone.utc).date() - reviewed).days > 365
+    return (datetime.now(timezone.utc).date() - reviewed).days > 180
 
 
 def _should_skip(path: Path, knowledge_root: Path) -> bool:

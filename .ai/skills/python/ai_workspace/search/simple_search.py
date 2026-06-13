@@ -20,6 +20,14 @@ IMPORTANT_KEYS = {
     "field_api_name",
     "record_key",
     "category",
+    # knowledge card fields
+    "title",
+    "keywords",
+    "domain",
+    "related_objects",
+    "related_config_objects",
+    "related_processes",
+    "summary",
 }
 
 
@@ -123,7 +131,11 @@ def _important_text(record: dict[str, Any]) -> str:
     values: list[str] = []
     for key in sorted(IMPORTANT_KEYS):
         value = record.get(key)
-        if value is not None:
+        if value is None:
+            continue
+        if isinstance(value, list):
+            values.extend(str(item) for item in value if str(item).strip())
+        else:
             values.append(str(value))
     return " ".join(values)
 

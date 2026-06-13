@@ -11,6 +11,25 @@ from typing import Any
 
 from ai_workspace.search.simple_search import score_record, search_jsonl, tokenize
 
+_STATUS_RANK: dict[str, int] = {"reviewed": 0, "approved": 0, "": 1, "draft": 2}
+_CONFIDENCE_RANK: dict[str, int] = {"high": 0, "medium": 1, "": 2, "low": 3}
+_RISK_PENALTY: dict[str, int] = {
+    "possible_secret": 10,
+    "missing_front_matter": 3,
+    "stale_review": 2,
+    "low_confidence": 1,
+    "draft_status": 1,
+    "missing_owner": 1,
+}
+
+
+def _knowledge_quality_rank(record: dict[str, Any]) -> float:
+    status = str(record.get("status") or "").lower()
+    confidence = str(record.get("confidence") or "").lower()
+    flags = record.get("risk_flags") if isinstance(record.get("risk_flags"), list) else []
+    penalty = sum(_RISK_PENALTY.get(str(f), 0) for f in flags)
+    return float(_STATUS_RANK.get(status, 1) * 10 + _CONFIDENCE_RANK.get(confidence, 2) + penalty)
+
 
 INDEX_FILES = {
     "metadata": "metadata-components.jsonl",
@@ -67,7 +86,11 @@ def main(argv: list[str] | None = None) -> int:
     fields = _search_index(index_dir / INDEX_FILES["fields"], args.query, args.field_limit)
     relationships = _search_index(index_dir / INDEX_FILES["relationships"], args.query, args.schema_limit)
     config_records = _search_index(index_dir / INDEX_FILES["config_records"], args.query, args.config_limit)
-    knowledge = _search_index(index_dir / INDEX_FILES["knowledge"], args.query, args.knowledge_limit)
+    knowledge_raw = _search_index(index_dir / INDEX_FILES["knowledge"], args.query, args.knowledge_limit * 3)
+    knowledge = sorted(
+        knowledge_raw,
+        key=lambda r: (-float(r.get("_search_score", 0)), _knowledge_quality_rank(r)),
+    )[:args.knowledge_limit]
 
     selected_counts = {
         "metadata": len(metadata),
@@ -571,6 +594,8 @@ def _knowledge_yaml(records: list[dict[str, Any]], query: str) -> str:
             f"    status: {_yaml_scalar(_value(record, 'status'))}",
             f"    confidence: {_yaml_scalar(_value(record, 'confidence'))}",
             f"    last_reviewed: {_yaml_scalar(_value(record, 'last_reviewed'))}",
+            f"    keywords: {_yaml_list(record.get('keywords'))}",
+            f"    related_objects: {_yaml_list(record.get('related_objects'))}",
             f"    risk_flags: {_yaml_list(record.get('risk_flags'))}",
             f"    search_confidence: {_yaml_scalar(_confidence(record, query))}",
         ])
