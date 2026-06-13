@@ -69,6 +69,11 @@ class SalesforceContextServer:
             return self.get_solution_design(str(arguments.get("work_item_id", "")))
         if name == "get_config_impact":
             return self.get_config_impact(str(arguments.get("work_item_id", "")))
+        if name == "list_knowledge_domain":
+            return self.list_knowledge_domain(
+                str(arguments.get("domain", "")),
+                _int_arg(arguments, "limit", 50),
+            )
         raise ValueError(f"Unknown tool: {name}")
 
     def search_context(self, query: str, top_k: int = 10) -> dict[str, Any]:
@@ -96,6 +101,7 @@ class SalesforceContextServer:
             "relevant-metadata.yaml",
             "relevant-schema.yaml",
             "relevant-config-records.yaml",
+            "relevant-knowledge.yaml",
             "config-impact.yaml",
         ]
         content: dict[str, Any] = {}
@@ -164,6 +170,25 @@ class SalesforceContextServer:
             "path": relative.as_posix(),
             "content": _read_limited(note_path, self.repo_root, limit=MAX_CONTENT_CHARS),
             "warnings": [],
+        }
+
+    def list_knowledge_domain(self, domain: str, limit: int = 50) -> dict[str, Any]:
+        if not domain or "\x00" in domain:
+            raise ValueError("domain is required")
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", domain):
+            raise ValueError("domain must contain only letters, digits, hyphens, and underscores")
+        path = self._index_file(INDEX_FILES["knowledge"])
+        records = []
+        for record in _read_jsonl(path):
+            if str(record.get("domain") or "").lower() == domain.lower():
+                records.append(_concise_record("knowledge", record))
+            if len(records) >= limit:
+                break
+        return {
+            "domain": domain,
+            "count": len(records),
+            "records": records,
+            "warnings": [] if path.exists() else [f"Missing knowledge index: {path.as_posix()}"],
         }
 
     def get_solution_design(self, work_item_id: str) -> dict[str, Any]:
@@ -316,6 +341,7 @@ def _tool_definitions() -> list[dict[str, Any]]:
         _tool("get_knowledge_note", "Read one capped markdown note under .ai/knowledge.", {"path": "string"}, ["path"]),
         _tool("get_solution_design", "Read approved or proposed solution design for a Work Item.", {"work_item_id": "string"}, ["work_item_id"]),
         _tool("get_config_impact", "Read local config impact artifacts for a Work Item.", {"work_item_id": "string"}, ["work_item_id"]),
+        _tool("list_knowledge_domain", "List all knowledge cards indexed under a specific domain (e.g. 'billing', 'time-expense').", {"domain": "string", "limit": "integer"}, ["domain"]),
     ]
 
 
