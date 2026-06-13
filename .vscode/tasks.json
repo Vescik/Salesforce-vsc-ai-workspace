@@ -4,31 +4,46 @@
     {
       "label": "AI Workspace: Setup",
       "type": "shell",
-      "command": "make setup",
+      "command": "pip install -e . --quiet && make setup",
+      "windows": {
+        "command": "pip install -e . --quiet; .\\scripts\\workspace.ps1 setup"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI Workspace: Configure",
       "type": "shell",
       "command": "make configure",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 configure"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI Workspace: Doctor",
       "type": "shell",
       "command": "make doctor",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 doctor"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI Workspace: Doctor Strict",
       "type": "shell",
       "command": "make doctor-strict",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 doctor-strict"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI Workspace: First Run",
       "type": "shell",
-      "command": "make first-run",
+      "command": "pip install -e . --quiet && make first-run",
+      "windows": {
+        "command": "pip install -e . --quiet; .\\scripts\\workspace.ps1 first-run"
+      },
       "problemMatcher": []
     },
     {
@@ -41,186 +56,297 @@
       "label": "Knowledge: Sync",
       "type": "shell",
       "command": "make knowledge-sync KB_REPO=\"${input:kbRepo}\" KB_BRANCH=\"${input:kbBranch}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-sync -KbRepo \"${input:kbRepo}\" -KbBranch \"${input:kbBranch}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "Knowledge: Index",
       "type": "shell",
       "command": "make knowledge-index",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-index"
+      },
       "problemMatcher": []
     },
     {
       "label": "Azure Wiki: Dry Run Publication",
       "type": "shell",
       "command": "make wiki-dry-run WORK_ITEM=${input:workItemId} WIKI_TITLE=\"${input:wikiTitle}\" WIKI_SOURCE=\"${input:wikiSource}\" AZURE_WIKI_REPO=\"${input:azureWikiRepo}\" AZURE_WIKI_BRANCH=\"${input:azureWikiBranch}\" WIKI_MODULE=\"${input:wikiModule}\" WIKI_TARGET_PATH=\"${input:wikiTargetPath}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 wiki-dry-run -WorkItem ${input:workItemId} -WikiTitle \"${input:wikiTitle}\" -WikiSource \"${input:wikiSource}\" -AzureWikiRepo \"${input:azureWikiRepo}\" -AzureWikiBranch \"${input:azureWikiBranch}\" -WikiModule \"${input:wikiModule}\" -WikiTargetPath \"${input:wikiTargetPath}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "Azure Wiki: Prepare Draft Branch",
       "type": "shell",
       "command": "make wiki-prepare-branch WORK_ITEM=${input:workItemId} WIKI_TITLE=\"${input:wikiTitle}\" WIKI_SOURCE=\"${input:wikiSource}\" AZURE_WIKI_REPO=\"${input:azureWikiRepo}\" AZURE_WIKI_BRANCH=\"${input:azureWikiBranch}\" WIKI_MODULE=\"${input:wikiModule}\" WIKI_TARGET_PATH=\"${input:wikiTargetPath}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 wiki-prepare-branch -WorkItem ${input:workItemId} -WikiTitle \"${input:wikiTitle}\" -WikiSource \"${input:wikiSource}\" -AzureWikiRepo \"${input:azureWikiRepo}\" -AzureWikiBranch \"${input:azureWikiBranch}\" -WikiModule \"${input:wikiModule}\" -WikiTargetPath \"${input:wikiTargetPath}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "Azure Wiki: Push Approved Branch",
       "type": "shell",
       "command": "make wiki-push-approved WORK_ITEM=${input:workItemId} WIKI_TITLE=\"${input:wikiTitle}\" WIKI_SOURCE=\"${input:wikiSource}\" AZURE_WIKI_REPO=\"${input:azureWikiRepo}\" AZURE_WIKI_BRANCH=\"${input:azureWikiBranch}\" WIKI_MODULE=\"${input:wikiModule}\" WIKI_TARGET_PATH=\"${input:wikiTargetPath}\" WIKI_APPROVAL_NOTE=\"${input:wikiApprovalNote}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 wiki-push-approved -WorkItem ${input:workItemId} -WikiTitle \"${input:wikiTitle}\" -WikiSource \"${input:wikiSource}\" -AzureWikiRepo \"${input:azureWikiRepo}\" -AzureWikiBranch \"${input:azureWikiBranch}\" -WikiModule \"${input:wikiModule}\" -WikiTargetPath \"${input:wikiTargetPath}\" -WikiApprovalNote \"${input:wikiApprovalNote}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "Azure Wiki: Scan Wiki",
       "type": "shell",
       "command": "make wiki-scan AZURE_WIKI_VENDOR_DIR=\"${input:azureWikiVendorDir}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 wiki-scan -AzureWikiVendorDir \"${input:azureWikiVendorDir}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "Context: Build Work Item Context",
       "type": "shell",
       "command": "make ai-context WORK_ITEM=${input:workItemId} QUERY=\"${input:contextQuery}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-context -WorkItem ${input:workItemId} -Query \"${input:contextQuery}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Index Repo Metadata",
       "type": "shell",
       "command": "make ai-index-repo",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-index-repo"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Index Org Schema",
       "type": "shell",
       "command": "make ai-index-schema ORG=${input:sfOrgAlias}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-index-schema -Org ${input:sfOrgAlias}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Index Config Records",
       "type": "shell",
       "command": "make ai-index-config ORG=${input:sfOrgAlias}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-index-config -Org ${input:sfOrgAlias}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Index All Context",
       "type": "shell",
       "command": "make ai-index-all ORG=${input:sfOrgAlias}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-index-all -Org ${input:sfOrgAlias}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Build Context Pack",
       "type": "shell",
       "command": "make ai-context WORK_ITEM=${input:workItemId} QUERY=\"${input:contextQuery}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-context -WorkItem ${input:workItemId} -Query \"${input:contextQuery}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Build Example Context Pack",
       "type": "shell",
       "command": "make ai-context-example",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-context-example"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: List Outputs",
       "type": "shell",
       "command": "make ai-list-outputs WORK_ITEM=${input:workItemId}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-list-outputs -WorkItem ${input:workItemId}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Check Python Imports",
       "type": "shell",
       "command": "make ai-check-python",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 ai-check-python"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Run Unit Tests",
       "type": "shell",
       "command": "make test",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 test"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Smoke Test Workspace",
       "type": "shell",
       "command": "make smoke",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 smoke"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Work Item Precheck",
       "type": "shell",
       "command": "make wi-precheck WORK_ITEM=${input:workItemId} BASE_REF=${input:baseRef}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 wi-precheck -WorkItem ${input:workItemId} -BaseRef ${input:baseRef}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Work Item Precheck Strict",
       "type": "shell",
       "command": "make wi-precheck-strict WORK_ITEM=${input:workItemId} BASE_REF=${input:baseRef}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 wi-precheck-strict -WorkItem ${input:workItemId} -BaseRef ${input:baseRef}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Config Impact",
       "type": "shell",
       "command": "make config-impact WORK_ITEM=${input:workItemId}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 config-impact -WorkItem ${input:workItemId}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Config Pack Skeleton",
       "type": "shell",
       "command": "make config-pack-skeleton WORK_ITEM=${input:workItemId}",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 config-pack-skeleton -WorkItem ${input:workItemId}"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Sync Knowledge Base Dry Run",
       "type": "shell",
       "command": "make knowledge-sync-dry-run KB_REPO=\"${input:kbRepo}\" KB_BRANCH=\"${input:kbBranch}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-sync-dry-run -KbRepo \"${input:kbRepo}\" -KbBranch \"${input:kbBranch}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Sync Knowledge Base",
       "type": "shell",
       "command": "make knowledge-sync KB_REPO=\"${input:kbRepo}\" KB_BRANCH=\"${input:kbBranch}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-sync -KbRepo \"${input:kbRepo}\" -KbBranch \"${input:kbBranch}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Import Knowledge File",
       "type": "shell",
       "command": "make knowledge-import KNOWLEDGE_SOURCE=\"${input:knowledgeSource}\" KNOWLEDGE_DOMAIN=\"${input:knowledgeDomain}\" KNOWLEDGE_TITLE=\"${input:knowledgeTitle}\" KNOWLEDGE_OWNER=\"${input:knowledgeOwner}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-import -KnowledgeSource \"${input:knowledgeSource}\" -KnowledgeDomain \"${input:knowledgeDomain}\" -KnowledgeTitle \"${input:knowledgeTitle}\" -KnowledgeOwner \"${input:knowledgeOwner}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Import Knowledge Manifest",
       "type": "shell",
       "command": "make knowledge-import-manifest KNOWLEDGE_MANIFEST=\"${input:knowledgeManifest}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-import-manifest -KnowledgeManifest \"${input:knowledgeManifest}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Index Knowledge Base",
       "type": "shell",
       "command": "make knowledge-index",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-index"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Search Knowledge Base",
       "type": "shell",
       "command": "make knowledge-search QUERY=\"${input:contextQuery}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-search -Query \"${input:contextQuery}\""
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Knowledge Push Dry Run",
+      "type": "shell",
+      "command": "make knowledge-push-dry-run KB_REPO=\"${input:kbRepo}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-push-dry-run -KbRepo \"${input:kbRepo}\""
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Knowledge Push",
+      "type": "shell",
+      "command": "make knowledge-push KB_REPO=\"${input:kbRepo}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-push -KbRepo \"${input:kbRepo}\""
+      },
       "problemMatcher": []
     },
     {
       "label": "Docs: Build Workspace Documentation",
       "type": "shell",
       "command": "make docs-build",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 docs-build"
+      },
       "problemMatcher": []
     },
     {
       "label": "Docs: Export PDFs",
       "type": "shell",
       "command": "make docs-export-pdf",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 docs-export-pdf"
+      },
       "problemMatcher": []
     },
     {
       "label": "Docs: Open HTML Runbook",
       "type": "shell",
       "command": "make docs-open-html",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 docs-open-html"
+      },
       "problemMatcher": []
     },
     {
       "label": "AI: Start Salesforce Context MCP",
       "type": "shell",
       "command": "make mcp-salesforce-context",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 mcp-salesforce-context"
+      },
       "problemMatcher": []
     }
   ],
