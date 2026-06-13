@@ -1,253 +1,219 @@
-# Copilot-only Salesforce AI Workspace
+# Salesforce VSC AI Workspace
 
-This repository contains deterministic local tooling and Copilot instructions for Salesforce development on top of the closed KimbleOne/Kantata managed package.
+> Local, deterministic AI assistance for Salesforce teams working on KimbleOne/Kantata — powered by GitHub Copilot, with no external LLM APIs.
 
-## Salesforce AI Workspace
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
+![Platform](https://img.shields.io/badge/Platform-Mac%20%7C%20Linux%20%7C%20Windows-lightgrey)
+![AI](https://img.shields.io/badge/AI-GitHub%20Copilot%20only-green)
+![Salesforce](https://img.shields.io/badge/Salesforce-DevOps%20Center-blue)
 
-This is a Copilot-only Salesforce AI Workspace for solution design, context indexing, documentation, QA support, prechecks, config impact review, and release readiness.
+---
 
-This is not:
+## What It Does
 
-- a deployment agent
-- a config apply tool
-- a replacement for DevOps Center
-- an external LLM integration
-- a source of truth for managed package internals
+- **Build local context packs** from Azure DevOps Work Items, repository metadata, Salesforce org schema, config records, and a curated internal Knowledge Base
+- **Generate solution designs, QA docs, and technical documentation** using specialized Copilot agents
+- **Review and validate** — implementation code, config impact, and release readiness before DevOps Center promotion
+- **Maintain internal knowledge** — sync, curate, index, search, and push a private KB about the managed package
+- **Publish Azure Wiki drafts** — draft-first, human-approved documentation pipeline
 
-The workspace assists, validates, and documents. It does not deploy metadata, apply configuration records, write to Salesforce, call external model APIs, or assume KimbleOne/Kantata managed package internals.
+## What It Does NOT Do
 
-## Quick Start For Employees
+- Does **not** deploy metadata or trigger Salesforce promotions
+- Does **not** apply configuration records
+- Does **not** call external LLM APIs (OpenAI, Anthropic, LangChain, etc.)
+- Does **not** auto-approve any design, release, or publication decision
 
-1. Clone the Salesforce project repository.
+---
 
-2. Install prerequisites:
+## Quick Start
 
-- Python 3.11+
-- Git
-- Salesforce CLI `sf`
-- VS Code
-- GitHub Copilot access
-- Azure DevOps access for Work Item read-only retrieval through VS Code MCP
+**1. Install prerequisites:** Python 3.11+, Git, Salesforce CLI (`sf`), VS Code + GitHub Copilot
 
-3. Run setup:
-
+**2. Clone and set up:**
 ```bash
+git clone <repo-url> && cd <repo-folder>
 make setup
+make configure      # interactive: sets your org alias, ADO org, KB URL
 ```
 
-4. Configure local values:
-
-```bash
-make configure
+**Windows:**
+```powershell
+.\scripts\workspace.ps1 setup
+.\scripts\workspace.ps1 configure
 ```
 
-5. Authenticate Salesforce:
-
+**3. Authenticate Salesforce:**
 ```bash
 sf org login web --alias IntDev
 ```
 
-6. Run doctor:
-
+**4. Verify and index:**
 ```bash
 make doctor
-```
-
-7. Build the local repo index:
-
-```bash
 make ai-index-repo
 ```
 
-8. Fetch Work Item context:
-
-```text
-/fetch-us EXAMPLE-WI
-```
-
-9. Optionally sync and index the Knowledge Base:
-
+**5. Start working in VS Code:**
 ```bash
-make knowledge-sync KB_REPO=<repo-url-or-local-path>
-make knowledge-index
+code .
+```
+Open Copilot Chat and type `/fetch-us YOUR-WORK-ITEM-ID` to begin.
+
+---
+
+## Features
+
+| Feature | Description | Command |
+|---|---|---|
+| Context indexing | Index repo metadata, Salesforce schema, and config records | `make ai-index-repo` / `make ai-index-all` |
+| Context packs | Build curated context for a Work Item | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` |
+| Knowledge Base sync | Pull curated package notes from external KB repo | `make knowledge-sync KB_REPO=<url>` |
+| Knowledge Base push | Push new notes back to the KB repo | `make knowledge-push KB_REPO=<url>` |
+| KB search | Search indexed knowledge notes | `make knowledge-search QUERY="<topic>"` |
+| Pre-promote check | Validate Work Item scope before deployment | `make wi-precheck WORK_ITEM=<ID>` |
+| Config impact | Analyze config record impact | `make config-impact WORK_ITEM=<ID>` |
+| Wiki drafts | Prepare Azure DevOps Wiki pages (draft-first) | `make wiki-dry-run ...` |
+| MCP server | Local read-only context tool server for Copilot | `make mcp-salesforce-context` |
+| Unit tests | Python tool validation | `make test` |
+
+---
+
+## Copilot Prompts
+
+Type these slash commands in VS Code Copilot Chat:
+
+| Command | Purpose |
+|---|---|
+| `/fetch-us <ID>` | Fetch and normalize Azure DevOps Work Item |
+| `/estimate-complexity <ID>` | Estimate size and risk (XS–XL) |
+| `/solution-design <ID>` | Generate implementation-neutral solution design |
+| `/solution-design-review <ID>` | Review design completeness and risk |
+| `/design-to-work-packets <ID>` | Break approved design into work packets |
+| `/investigate-bug <ID>` | Root-cause analysis for defects |
+| `/review-implementation <ID>` | Review Apex/Flow/LWC against design |
+| `/config-impact <ID>` | Review config record impact |
+| `/create-documentation <ID>` | Generate technical documentation draft |
+| `/create-how-to-test <ID>` | Generate QA how-to-test instructions |
+| `/pre-promote-report <ID> <ENV>` | Draft pre-promote report |
+| `/release-readiness-review <ID>` | Full release readiness review |
+| `/rollback-impact-analysis <ID> <ENV>` | Analyze rollback impact |
+| `/prepare-wiki-page <ID>` | Prepare Azure Wiki draft |
+| `/sync-knowledge <KB_URL>` | Sync external Knowledge Base |
+| `/build-knowledge-context <QUERY>` | Select relevant KB notes |
+
+Full prompt reference: [docs/workspace/USER-GUIDE.md — §9](docs/workspace/USER-GUIDE.md#9-copilot-prompts-reference)
+
+---
+
+## Documentation
+
+| Document | Description |
+|---|---|
+| [USER-GUIDE.md](docs/workspace/USER-GUIDE.md) | **Complete user guide** — step-by-step instructions for every feature |
+| [QUICKSTART.md](QUICKSTART.md) | Five-step quick start |
+| [installation-guide.md](docs/workspace/installation-guide.md) | Detailed installation guide |
+| [developer-process-runbook.md](docs/workspace/developer-process-runbook.md) | End-to-end developer workflow |
+| [knowledge-base-runbook.md](docs/workspace/knowledge-base-runbook.md) | Knowledge Base management guide |
+| [azure-wiki-publication-runbook.md](docs/workspace/azure-wiki-publication-runbook.md) | Azure Wiki publication workflow |
+| [workspace-architecture-technical.md](docs/workspace/workspace-architecture-technical.md) | Technical architecture reference |
+| [appendix-command-reference.md](docs/workspace/appendix-command-reference.md) | Complete command reference |
+| [security-and-governance.md](docs/workspace/security-and-governance.md) | Security model and governance |
+| [troubleshooting.md](docs/workspace/troubleshooting.md) | Common issues and fixes |
+| [AI-CONTEXT.md](AI-CONTEXT.md) | Single-file AI orientation (attach to any AI chat) |
+
+---
+
+## Repository Structure
+
+```
+.github/
+├── agents/          # 11 custom Copilot agents
+├── prompts/         # 24+ slash-command prompt files
+└── workflows/       # GitHub Actions validation (no deployment)
+
+.ai/
+├── config/          # workspace.local.json (gitignored), example template
+├── context/         # Work Item artifacts + generated indexes (gitignored)
+├── knowledge/       # Curated KB notes (synced from external repo)
+├── skills/python/   # Python toolchain (zero runtime pip deps)
+├── deployment/      # Runbooks and pipeline gate configuration
+├── templates/       # Document templates
+└── wiki/            # Wiki module map and publication policy
+
+.vscode/
+├── mcp.json         # MCP server configuration (auto-updated by make configure)
+├── tasks.json       # VS Code tasks
+└── settings.json    # Workspace settings
+
+scripts/
+├── workspace.ps1    # Windows PowerShell wrapper (all make targets)
+├── setup.py         # Python setup script
+├── configure.py     # Python configure script
+└── doctor.py        # Python doctor script
+
+config/data-promotion/
+├── config-object-registry.yaml  # Enabled config objects for indexing
+└── masking-policy.yaml          # Field masking rules for config records
+
+docs/workspace/      # Workspace documentation
+force-app/           # Salesforce metadata (DX project)
+specs/               # Solution designs (proposed + approved)
+Makefile             # Primary command interface (Mac/Linux)
 ```
 
-10. Build context:
+---
 
-```bash
-make ai-context WORK_ITEM=EXAMPLE-WI QUERY="example"
-```
+## Requirements
 
-## Platform Notes
+| Requirement | Version | Purpose |
+|---|---|---|
+| Python | 3.11+ | Local toolchain (zero external pip deps) |
+| Git | Any | Repository and KB operations |
+| Salesforce CLI (`sf`) | Latest | Schema and config indexing, org auth |
+| VS Code | Latest | Editor + Copilot Chat integration |
+| GitHub Copilot | Active subscription | AI layer (only approved AI) |
+| Azure DevOps | Read access | Work Item retrieval via MCP |
 
-macOS/Linux:
+---
 
-```bash
-./scripts/setup.sh
-./scripts/doctor.sh
-```
+## Windows Users
 
-Windows PowerShell:
+A full PowerShell wrapper mirrors every `make` target:
 
 ```powershell
-.\scripts\setup.ps1
-.\scripts\doctor.ps1
+.\scripts\workspace.ps1 help          # list all commands
+.\scripts\workspace.ps1 setup
+.\scripts\workspace.ps1 configure
+.\scripts\workspace.ps1 ai-context -WorkItem KIM-1234 -Query "invoice approval"
+.\scripts\workspace.ps1 knowledge-sync -KbRepo "https://github.com/org/kb.git"
+.\scripts\workspace.ps1 wi-precheck -WorkItem KIM-1234 -BaseRef "HEAD~1"
 ```
 
-If `make` is not installed on Windows, use:
+VS Code Tasks (platform-neutral): `Ctrl+Shift+P` → `Tasks: Run Task`
 
-```powershell
-python scripts/setup.py
-python scripts/configure.py
-python scripts/doctor.py
-```
+Full Windows guide: [docs/workspace/USER-GUIDE.md — §12](docs/workspace/USER-GUIDE.md#12-windows-users-guide)
 
-## Configuration
+---
 
-Committed examples:
+## Security & Governance
 
-- `.ai/config/workspace.example.json`
-- `.ai/config/workspace.local.json.example`
+- All AI outputs are **drafts** — no auto-approve, no auto-deploy
+- No external LLM APIs — GitHub Copilot only
+- No Salesforce writes — `allow_salesforce_writes: false` enforced in config
+- No config record application — `allow_config_apply: false` enforced
+- No secrets in repository — `.ai/config/workspace.local.json` is gitignored
+- KB notes scanned for secret-like values before push
+- Azure Wiki: push requires explicit `WIKI_APPROVAL_NOTE` and local `push_enabled: true`
+- DevOps Center remains the only official metadata promotion mechanism
 
-Local ignored config:
+Full governance reference: [docs/workspace/security-and-governance.md](docs/workspace/security-and-governance.md)
 
-- `.ai/config/workspace.local.json`
+---
 
-Salesforce auth is managed by Salesforce CLI. Do not store Salesforce tokens, passwords, private keys, or secrets in workspace config.
+## Knowledge Base Repositories
 
-Azure DevOps Work Item fetch uses the remote `ado-remote-mcp` server in `.vscode/mcp.json`. Replace the committed `YOUR_ADO_ORG` placeholder with your Azure DevOps organization in local VS Code MCP configuration before running `/fetch-us <WORK_ITEM_ID>`. Do not store ADO PATs, OAuth tokens, passwords, or employee credentials in repository config.
-
-## Common Commands
-
-```bash
-make help
-make setup
-make configure
-make doctor
-make first-run
-make ai-index-repo
-make knowledge-index
-make ai-context WORK_ITEM=<WORK_ITEM_ID> QUERY="<business topic>"
-make wiki-dry-run WORK_ITEM=<WORK_ITEM_ID> WIKI_TITLE="<page title>" WIKI_SOURCE=docs/architecture/<WORK_ITEM_ID>.md AZURE_WIKI_REPO=<wiki-repo>
-make wiki-prepare-branch WORK_ITEM=<WORK_ITEM_ID> WIKI_TITLE="<page title>" WIKI_SOURCE=docs/architecture/<WORK_ITEM_ID>.md AZURE_WIKI_REPO=<wiki-repo>
-make wi-precheck WORK_ITEM=<WORK_ITEM_ID> BASE_REF=HEAD~1
-```
-
-Commands that require Salesforce CLI org authentication:
-
-```bash
-make ai-index-schema ORG=IntDev
-make ai-index-config ORG=IntDev
-make ai-index-all ORG=IntDev
-make doctor-strict
-```
-
-## Internal Knowledge Base
-
-Internal managed package knowledge is maintained in a separate private Knowledge Base Git repository. This workspace syncs curated Markdown notes into `.ai/knowledge/`, keeps the local clone cache under gitignored `.ai/vendor/knowledge-base/`, and indexes selected notes into `.ai/context/index/knowledge-cards.jsonl`.
-
-Use a dry run before syncing:
-
-```bash
-make knowledge-sync-dry-run KB_REPO=<repo-url-or-local-path>
-```
-
-Employees can either pass `KB_REPO` on the command line or set the ignored local config file:
-
-```json
-{
-  "knowledge_base": {
-    "enabled": true,
-    "repo_url": "git@github.com:<ORG>/<KB_REPO>.git",
-    "branch": "main",
-    "sync_on_setup": false
-  }
-}
-```
-
-Then sync and index:
-
-```bash
-make knowledge-sync KB_REPO=<repo-url-or-local-path>
-make knowledge-index
-```
-
-Context packs search the generated knowledge index and include only selected KB cards in the `Relevant Internal Knowledge` section. KB notes are supporting evidence, not global instructions; draft, low-confidence, stale, or conflicting notes require human validation.
-
-## Azure Wiki Draft Publication
-
-Azure DevOps Wiki publication is draft-first and human reviewed. Configure the wiki Git repository locally through `AZURE_WIKI_REPO`, `.ai/config/workspace.local.json`, or a Makefile argument. Do not store Azure DevOps PATs, tokens, or credentials in repository config.
-
-Recommended flow:
-
-```bash
-make wiki-dry-run WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval Routing" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<wiki-repo>
-make wiki-prepare-branch WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval Routing" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<wiki-repo>
-make wiki-push-approved WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval Routing" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<wiki-repo> WIKI_APPROVAL_NOTE="Approved by <reviewer/date>"
-```
-
-`wiki-dry-run` inspects the wiki clone, chooses a draft target path, and writes local reports/previews under `.ai/outputs/wiki/`. `wiki-prepare-branch` creates a local draft branch and commit in `.ai/vendor/azure-wiki/`. `wiki-push-approved` requires explicit approval, `WIKI_APPROVAL_NOTE`, and local `azure_wiki.push_enabled=true`; it pushes only the feature branch. PR creation, review, merge, and final publication remain manual Azure DevOps steps.
-
-## Documentation Pack
-
-Workspace documentation is under `docs/workspace/`:
-
-- installation guide
-- non-technical overview
-- technical architecture
-- agents, prompts, skills, and MCP reference
-- developer process runbook
-- Knowledge Base runbook
-- Azure Wiki publication runbook
-- security and governance
-- troubleshooting
-- command reference
-- offline HTML one-page runbook
-- PDF export folder
-
-Start here:
-
-- `docs/workspace/README.md`
-- `docs/workspace/html/index.html`
-
-Regenerate or validate the docs package:
-
-```bash
-make docs-build
-make docs-export-pdf
-make docs-pack
-```
-
-PDF export uses local tools if available. If no supported PDF tool is installed, the workspace writes manual export instructions under `docs/workspace/pdf/README.md`.
-
-## Work Item Flow
-
-1. Checkout the DevOps Center Work Item branch.
-2. Run `/fetch-us <WORK_ITEM_ID>` to create normalized local Work Item artifacts from read-only Azure DevOps MCP data.
-3. Run `make ai-index-repo`.
-4. Build context with `make ai-context WORK_ITEM=<WORK_ITEM_ID> QUERY="<business topic>"`.
-5. Use Copilot prompts such as `/solution-design`, `/solution-design-review`, and `/design-to-work-packets`.
-6. Implement manually and with Copilot assistance, keeping changes scoped to the Work Item and acceptance criteria.
-7. Run `make config-impact WORK_ITEM=<WORK_ITEM_ID>` and `make wi-precheck WORK_ITEM=<WORK_ITEM_ID> BASE_REF=HEAD~1`.
-8. Generate draft docs and QA instructions with `/create-documentation` and `/create-how-to-test`.
-9. Promote Salesforce metadata through DevOps Center.
-
-## Boundaries
-
-- GitHub Copilot is the only approved AI execution layer.
-- DevOps Center remains the official Salesforce metadata promotion mechanism.
-- IntDev is a Full Copy developer/discovery org without Git and is not the source of truth.
-- Config record promotion is separate from metadata promotion.
-- Config apply and production writes are not implemented.
-- Salesforce schema/config indexing requires `sf` CLI authentication when those commands are run.
-- No external LLM API keys are required.
-
-## Local Validation
-
-```bash
-make ai-check-python
-make test
-make smoke
-```
-
-`make smoke` is local-only and does not require org authentication. It may report precheck warnings when Work Item scope files are missing or example QA artifacts have not been generated yet.
+| Repository | Purpose | Visibility |
+|---|---|---|
+| `Vescik/Salesforce-vsc-ai-workspace` | This workspace | Public |
+| `Vescik/Salesforce-knowledge-base` | Curated KimbleOne/Kantata notes | Private |
