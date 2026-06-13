@@ -2,6 +2,8 @@
 
 Audience: Salesforce developers, technical consultants, and new employees setting up the Copilot-only Salesforce AI Workspace.
 
+> **Platform note:** All commands shown Windows (PowerShell) first, followed by Mac / Linux. VS Code Tasks are also available: Ctrl+Shift+P → Tasks: Run Task
+
 ## Purpose
 
 This workspace provides local, deterministic support for Salesforce work on top of the closed KimbleOne/Kantata managed package. It helps developers gather context, create solution designs, generate documentation and QA how-to-test drafts, review config impact, and run prechecks.
@@ -45,7 +47,12 @@ Use the project repository provided by the team. Do not clone a Full Copy org ex
 
 ## Run Setup
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 setup
+```
 ```bash
+# Mac / Linux
 make setup
 ```
 
@@ -53,7 +60,12 @@ This creates local workspace folders and a local config file if needed. It does 
 
 ## Configure Local Values
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 configure
+```
 ```bash
+# Mac / Linux
 make configure
 ```
 
@@ -99,7 +111,12 @@ Optional validation org aliases can be configured locally when validation-only w
 
 ## Run Doctor
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 doctor
+```
 ```bash
+# Mac / Linux
 make doctor
 ```
 
@@ -107,7 +124,12 @@ Doctor checks local prerequisites, config shape, safe settings, and common works
 
 Strict doctor can check optional org auth and Knowledge Base readiness:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 doctor-strict
+```
 ```bash
+# Mac / Linux
 make doctor-strict
 ```
 
@@ -115,14 +137,25 @@ make doctor-strict
 
 If your team uses the separate private Knowledge Base repository:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-sync -KbRepo "git@github.com:<ORG>/<KB_REPO>.git"
+.\scripts\workspace.ps1 knowledge-index
+```
 ```bash
+# Mac / Linux
 make knowledge-sync KB_REPO=git@github.com:<ORG>/<KB_REPO>.git
 make knowledge-index
 ```
 
 Use a dry run first when testing access:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "git@github.com:<ORG>/<KB_REPO>.git"
+```
 ```bash
+# Mac / Linux
 make knowledge-sync-dry-run KB_REPO=git@github.com:<ORG>/<KB_REPO>.git
 ```
 
@@ -132,13 +165,23 @@ The local vendor clone lives under `.ai/vendor/knowledge-base/` and is ignored. 
 
 Build the local repository metadata index:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-index-repo
+```
 ```bash
+# Mac / Linux
 make ai-index-repo
 ```
 
 Build a Work Item context pack:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-context -WorkItem EXAMPLE-WI -Query "example"
+```
 ```bash
+# Mac / Linux
 make ai-context WORK_ITEM=EXAMPLE-WI QUERY="example"
 ```
 
@@ -152,14 +195,27 @@ The `/fetch-us` prompt uses read-only Azure DevOps MCP when configured. If MCP i
 
 ## Optional Validation
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 test
+.\scripts\workspace.ps1 smoke
+```
 ```bash
+# Mac / Linux
 make test
 make smoke
 ```
 
 Commands that require Salesforce CLI auth:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-index-schema -Org IntDev
+.\scripts\workspace.ps1 ai-index-config -Org IntDev
+.\scripts\workspace.ps1 ai-index-all -Org IntDev
+```
 ```bash
+# Mac / Linux
 make ai-index-schema ORG=IntDev
 make ai-index-config ORG=IntDev
 make ai-index-all ORG=IntDev
@@ -192,8 +248,8 @@ Tasks use the same Makefile commands so behavior is consistent between terminal 
 - Git auth issues: verify SSH keys or HTTPS credentials for the private repos.
 - Knowledge Base access denied: confirm the repo URL, branch, and read permission.
 - Azure Wiki access denied: confirm wiki Git URL and Git credentials.
-- Make unavailable on Windows: use the Python scripts directly or install make.
-- `PYTHONPATH` issues: run commands through Makefile, which sets `PYTHONPATH=.ai/skills/python`.
+- Make unavailable on Windows: use `.\scripts\workspace.ps1 <command>` or VS Code Tasks instead.
+- `PYTHONPATH` issues: run `pip install -e .` once, then all commands work without PYTHONPATH.
 - PDF export unavailable: run `make docs-export-pdf` and follow `docs/workspace/pdf/README.md`.
 
 ## Security Notes

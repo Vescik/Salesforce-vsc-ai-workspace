@@ -3,7 +3,7 @@
 > Local, deterministic AI assistance for Salesforce teams working on KimbleOne/Kantata — powered by GitHub Copilot, with no external LLM APIs.
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
-![Platform](https://img.shields.io/badge/Platform-Mac%20%7C%20Linux%20%7C%20Windows-lightgrey)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey)
 ![AI](https://img.shields.io/badge/AI-GitHub%20Copilot%20only-green)
 ![Salesforce](https://img.shields.io/badge/Salesforce-DevOps%20Center-blue)
 
@@ -31,56 +31,68 @@
 **1. Install prerequisites:** Python 3.11+, Git, Salesforce CLI (`sf`), VS Code + GitHub Copilot
 
 **2. Clone, install, and set up:**
-```bash
-git clone <repo-url> && cd <repo-folder>
-pip install -e .    # installs ai_workspace package (zero external deps)
-make setup
-make configure      # interactive: sets your org alias, ADO org, KB URL
-```
 
-**Windows:**
 ```powershell
+# Windows (PowerShell)
 git clone <repo-url>; cd <repo-folder>
 pip install -e .
 .\scripts\workspace.ps1 setup
 .\scripts\workspace.ps1 configure
 ```
 
-> `make setup` / `.\scripts\workspace.ps1 setup` also run `pip install -e .` automatically.
+```bash
+# Mac / Linux
+git clone <repo-url> && cd <repo-folder>
+pip install -e .
+make setup
+make configure
+```
+
+> `pip install -e .` is run automatically by `setup` — needed only if skipping setup.  
+> `configure` is interactive: sets your Salesforce org alias, Azure DevOps organization, and Knowledge Base URL.
 
 **3. Authenticate Salesforce:**
-```bash
+```powershell
 sf org login web --alias IntDev
 ```
 
 **4. Verify and index:**
+```powershell
+# Windows
+.\scripts\workspace.ps1 doctor
+.\scripts\workspace.ps1 ai-index-repo
+```
 ```bash
+# Mac / Linux
 make doctor
 make ai-index-repo
 ```
 
-**5. Start working in VS Code:**
-```bash
+**5. Open VS Code and start:**
+```powershell
 code .
 ```
 Open Copilot Chat and type `/fetch-us YOUR-WORK-ITEM-ID` to begin.
+
+> **VS Code Tasks** (all platforms): `Ctrl+Shift+P` → `Tasks: Run Task` — all commands available as clickable tasks.
 
 ---
 
 ## Features
 
-| Feature | Description | Command |
+| Feature | Windows (PowerShell) | Mac / Linux |
 |---|---|---|
-| Context indexing | Index repo metadata, Salesforce schema, and config records | `make ai-index-repo` / `make ai-index-all` |
-| Context packs | Build curated context for a Work Item | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` |
-| Knowledge Base sync | Pull curated package notes from external KB repo | `make knowledge-sync KB_REPO=<url>` |
-| Knowledge Base push | Push new notes back to the KB repo | `make knowledge-push KB_REPO=<url>` |
-| KB search | Search indexed knowledge notes | `make knowledge-search QUERY="<topic>"` |
-| Pre-promote check | Validate Work Item scope before deployment | `make wi-precheck WORK_ITEM=<ID>` |
-| Config impact | Analyze config record impact | `make config-impact WORK_ITEM=<ID>` |
-| Wiki drafts | Prepare Azure DevOps Wiki pages (draft-first) | `make wiki-dry-run ...` |
-| MCP server | Local read-only context tool server for Copilot | `make mcp-salesforce-context` |
-| Unit tests | Python tool validation | `make test` |
+| Context indexing | `.\scripts\workspace.ps1 ai-index-repo` | `make ai-index-repo` |
+| Index all (schema + config) | `.\scripts\workspace.ps1 ai-index-all -Org IntDev` | `make ai-index-all ORG=IntDev` |
+| Build context pack | `.\scripts\workspace.ps1 ai-context -WorkItem <ID> -Query "<topic>"` | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` |
+| Knowledge Base sync | `.\scripts\workspace.ps1 knowledge-sync -KbRepo <url>` | `make knowledge-sync KB_REPO=<url>` |
+| Knowledge Base push | `.\scripts\workspace.ps1 knowledge-push -KbRepo <url>` | `make knowledge-push KB_REPO=<url>` |
+| KB search | `.\scripts\workspace.ps1 knowledge-search -Query "<topic>"` | `make knowledge-search QUERY="<topic>"` |
+| Pre-promote check | `.\scripts\workspace.ps1 wi-precheck -WorkItem <ID>` | `make wi-precheck WORK_ITEM=<ID>` |
+| Config impact | `.\scripts\workspace.ps1 config-impact -WorkItem <ID>` | `make config-impact WORK_ITEM=<ID>` |
+| Wiki draft | `.\scripts\workspace.ps1 wiki-dry-run -WorkItem <ID> ...` | `make wiki-dry-run WORK_ITEM=<ID> ...` |
+| MCP server | `.\scripts\workspace.ps1 mcp-salesforce-context` | `make mcp-salesforce-context` |
+| Run tests | `.\scripts\workspace.ps1 test` | `make test` |
 
 ---
 
@@ -147,12 +159,12 @@ Full prompt reference: [docs/workspace/USER-GUIDE.md — §9](docs/workspace/USE
 └── wiki/            # Wiki module map and publication policy
 
 .vscode/
-├── mcp.json         # MCP server configuration (auto-updated by make configure)
-├── tasks.json       # VS Code tasks
+├── mcp.json         # MCP server configuration (auto-updated by configure)
+├── tasks.json       # VS Code tasks — all commands, Windows + Mac/Linux
 └── settings.json    # Workspace settings
 
 scripts/
-├── workspace.ps1    # Windows PowerShell wrapper (all make targets)
+├── workspace.ps1    # Windows PowerShell: all commands (primary on Windows)
 ├── setup.py         # Python setup script
 ├── configure.py     # Python configure script
 └── doctor.py        # Python doctor script
@@ -164,7 +176,8 @@ config/data-promotion/
 docs/workspace/      # Workspace documentation
 force-app/           # Salesforce metadata (DX project)
 specs/               # Solution designs (proposed + approved)
-Makefile             # Primary command interface (Mac/Linux)
+Makefile             # Command interface for Mac / Linux
+setup.py             # Enables pip install -e . on all platforms
 ```
 
 ---
@@ -180,24 +193,7 @@ Makefile             # Primary command interface (Mac/Linux)
 | GitHub Copilot | Active subscription | AI layer (only approved AI) |
 | Azure DevOps | Read access | Work Item retrieval via MCP |
 
----
-
-## Windows Users
-
-A full PowerShell wrapper mirrors every `make` target:
-
-```powershell
-.\scripts\workspace.ps1 help          # list all commands
-.\scripts\workspace.ps1 setup
-.\scripts\workspace.ps1 configure
-.\scripts\workspace.ps1 ai-context -WorkItem KIM-1234 -Query "invoice approval"
-.\scripts\workspace.ps1 knowledge-sync -KbRepo "https://github.com/org/kb.git"
-.\scripts\workspace.ps1 wi-precheck -WorkItem KIM-1234 -BaseRef "HEAD~1"
-```
-
-VS Code Tasks (platform-neutral): `Ctrl+Shift+P` → `Tasks: Run Task`
-
-Full Windows guide: [docs/workspace/USER-GUIDE.md — §12](docs/workspace/USER-GUIDE.md#12-windows-users-guide)
+> **Windows note:** `make` is not required. Use `.\scripts\workspace.ps1 <command>` or VS Code Tasks instead.
 
 ---
 

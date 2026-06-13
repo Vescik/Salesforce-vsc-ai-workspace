@@ -50,6 +50,8 @@ GitHub Copilot is the **only** approved AI execution layer. The workspace provid
 
 > ⚠️ **All AI outputs are drafts.** Human review and approval are required before any design, deployment, or publication action.
 
+> **Windows users:** All commands in this guide are shown Windows (PowerShell) first, followed by Mac / Linux. For a consolidated quick-reference of all PowerShell equivalents, see [Section 12 — Windows Users Guide](#12-windows-users-guide).
+
 ---
 
 ## 2. Prerequisites
@@ -99,6 +101,8 @@ Install these tools before running setup:
 
 ## 3. Installation & First-Time Setup
 
+> All examples show Windows (PowerShell) first, followed by Mac / Linux.
+
 ### Step 1 — Clone the Repository
 
 ```bash
@@ -110,30 +114,32 @@ cd <repo-folder>
 
 Registers the `ai_workspace` Python package in your Python environment so all commands work without manually setting `PYTHONPATH`. The package has **zero external dependencies** — no packages are downloaded from PyPI.
 
-```bash
+```powershell
+# Windows (PowerShell)
 pip install -e .
 ```
 
-**Windows:**
-```powershell
+```bash
+# Mac / Linux
 pip install -e .
 ```
 
 This is a one-time step per Python environment. After this, you can run any `ai_workspace` module directly (e.g., `python -m ai_workspace.mcp.salesforce_context_mcp`).
 
-> ℹ️ `make setup` and `.\scripts\workspace.ps1 setup` run `pip install -e .` automatically, so you only need this step if you are setting up without using those commands.
+> ℹ️ `.\scripts\workspace.ps1 setup` and `make setup` run `pip install -e .` automatically, so you only need this step if you are setting up without using those commands.
 
 ### Step 3 — Run Setup (includes pip install automatically)
 
 Creates the required directory structure and generates a local configuration file from the example template.
 
-```bash
-make setup
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 setup
 ```
 
-**Windows:**
-```powershell
-.\scripts\workspace.ps1 setup
+```bash
+# Mac / Linux
+make setup
 ```
 
 **What it creates:**
@@ -144,13 +150,14 @@ make setup
 
 Runs an interactive prompt to set your org alias, Azure DevOps organization, and (optionally) Knowledge Base repository URL. Also automatically updates `.vscode/mcp.json` with your ADO organization.
 
-```bash
-make configure
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 configure
 ```
 
-**Windows:**
-```powershell
-.\scripts\workspace.ps1 configure
+```bash
+# Mac / Linux
+make configure
 ```
 
 **You will be asked for:**
@@ -173,13 +180,14 @@ Replace `IntDev` with the alias you set in step 3.
 
 ### Step 6 — Verify Setup
 
-```bash
-make doctor
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 doctor
 ```
 
-**Windows:**
-```powershell
-.\scripts\workspace.ps1 doctor
+```bash
+# Mac / Linux
+make doctor
 ```
 
 The doctor check reports:
@@ -193,13 +201,14 @@ The doctor check reports:
 
 Scans your repository and creates a local metadata component index. No Salesforce org connection required.
 
-```bash
-make ai-index-repo
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-index-repo
 ```
 
-**Windows:**
-```powershell
-.\scripts\workspace.ps1 ai-index-repo
+```bash
+# Mac / Linux
+make ai-index-repo
 ```
 
 **What it creates:**
@@ -209,14 +218,27 @@ make ai-index-repo
 
 If you have a Knowledge Base repository configured:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-sync -KbRepo "https://github.com/your-org/knowledge-base.git"
+.\scripts\workspace.ps1 knowledge-index
+```
+
 ```bash
+# Mac / Linux
 make knowledge-sync KB_REPO=https://github.com/your-org/knowledge-base.git
 make knowledge-index
 ```
 
 ### Step 9 — Open in VS Code
 
+```powershell
+# Windows (PowerShell)
+code .
+```
+
 ```bash
+# Mac / Linux
 code .
 ```
 
@@ -300,7 +322,13 @@ In VS Code Copilot Chat, type:
 
 ### Step 3 — Build Context
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-context -WorkItem KIM-1234 -Query "invoice approval billing"
+```
+
 ```bash
+# Mac / Linux
 make ai-context WORK_ITEM=KIM-1234 QUERY="invoice approval billing"
 ```
 
@@ -378,7 +406,13 @@ Implement changes in VS Code. Copilot assists with code generation, and the loca
 
 ### Step 8 — Run Local Precheck
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wi-precheck -WorkItem KIM-1234 -BaseRef HEAD~1
+```
+
 ```bash
+# Mac / Linux
 make wi-precheck WORK_ITEM=KIM-1234 BASE_REF=HEAD~1
 ```
 
@@ -389,7 +423,13 @@ make wi-precheck WORK_ITEM=KIM-1234 BASE_REF=HEAD~1
 
 For strict mode (fails on high-severity findings):
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wi-precheck-strict -WorkItem KIM-1234 -BaseRef origin/main
+```
+
 ```bash
+# Mac / Linux
 make wi-precheck-strict WORK_ITEM=KIM-1234 BASE_REF=origin/main
 ```
 
@@ -409,7 +449,13 @@ make wi-precheck-strict WORK_ITEM=KIM-1234 BASE_REF=origin/main
 
 ### Step 10 — Analyze Config Impact
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 config-impact -WorkItem KIM-1234
+```
+
 ```bash
+# Mac / Linux
 make config-impact WORK_ITEM=KIM-1234
 ```
 
@@ -536,7 +582,13 @@ keywords:
 
 1. **Preview what will be synced (no changes made):**
 
+   ```powershell
+   # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "https://github.com/your-org/knowledge-base.git"
+   ```
+
    ```bash
+   # Mac / Linux
    make knowledge-sync-dry-run KB_REPO=https://github.com/your-org/knowledge-base.git
    ```
 
@@ -544,13 +596,25 @@ keywords:
 
 3. **Sync (copies notes to `.ai/knowledge/`):**
 
+   ```powershell
+   # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-sync -KbRepo "https://github.com/your-org/knowledge-base.git"
+   ```
+
    ```bash
+   # Mac / Linux
    make knowledge-sync KB_REPO=https://github.com/your-org/knowledge-base.git
    ```
 
 4. **Rebuild the search index:**
 
+   ```powershell
+   # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-index
+   ```
+
    ```bash
+   # Mac / Linux
    make knowledge-index
    ```
 
@@ -562,7 +626,13 @@ keywords:
 
 2. Run import:
 
+   ```powershell
+   # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-import -KnowledgeSource .ai/knowledge/imports/billing-rules.txt -KnowledgeDomain billing -KnowledgeTitle "Billing Schedule Rules"
+   ```
+
    ```bash
+   # Mac / Linux
    make knowledge-import \
      KNOWLEDGE_SOURCE=.ai/knowledge/imports/billing-rules.txt \
      KNOWLEDGE_DOMAIN=billing \
@@ -579,13 +649,25 @@ keywords:
 
 5. Rebuild the index:
 
+   ```powershell
+   # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-index
+   ```
+
    ```bash
+   # Mac / Linux
    make knowledge-index
    ```
 
 ### Workflow: Search the Knowledge Base
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-search -Query "invoice approval"
+```
+
 ```bash
+# Mac / Linux
 make knowledge-search QUERY="invoice approval"
 ```
 
@@ -595,13 +677,25 @@ Or in Copilot Chat — just ask a question. Copilot calls `get_related_knowledge
 
 1. **Preview what will be pushed:**
 
+   ```powershell
+   # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-push-dry-run -KbRepo "https://github.com/your-org/knowledge-base.git"
+   ```
+
    ```bash
+   # Mac / Linux
    make knowledge-push-dry-run KB_REPO=https://github.com/your-org/knowledge-base.git
    ```
 
 2. **Commit and push to external repo:**
 
+   ```powershell
+   # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-push -KbRepo "https://github.com/your-org/knowledge-base.git"
+   ```
+
    ```bash
+   # Mac / Linux
    make knowledge-push KB_REPO=https://github.com/your-org/knowledge-base.git
    ```
 
@@ -644,7 +738,13 @@ Creates `docs/architecture/KIM-1234.md`.
 
 **Step 2 — Dry run (inspect wiki, choose placement, write preview):**
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wiki-dry-run -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "https://dev.azure.com/ORG/PROJECT/_git/PROJECT.wiki"
+```
+
 ```bash
+# Mac / Linux
 make wiki-dry-run \
   WORK_ITEM=KIM-1234 \
   WIKI_TITLE="Invoice Approval Routing" \
@@ -667,7 +767,13 @@ Checks whether the suggested placement section is appropriate.
 
 **Step 4 — Prepare a draft branch (local commit, no remote push):**
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wiki-prepare-branch -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "https://dev.azure.com/ORG/PROJECT/_git/PROJECT.wiki"
+```
+
 ```bash
+# Mac / Linux
 make wiki-prepare-branch \
   WORK_ITEM=KIM-1234 \
   WIKI_TITLE="Invoice Approval Routing" \
@@ -689,7 +795,13 @@ Checks:
 
 **Step 6 — Push approved branch (requires WIKI_APPROVAL_NOTE):**
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wiki-push-approved -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "https://dev.azure.com/ORG/PROJECT/_git/PROJECT.wiki" -WikiApprovalNote "Approved by Jane Smith 2026-06-13"
+```
+
 ```bash
+# Mac / Linux
 make wiki-push-approved \
   WORK_ITEM=KIM-1234 \
   WIKI_TITLE="Invoice Approval Routing" \
@@ -713,83 +825,83 @@ make wiki-push-approved \
 
 ### Setup & Health
 
-| Command | Purpose |
-|---|---|
-| `make setup` | Bootstrap workspace, create config and directories |
-| `make setup-venv` | Setup + create Python virtual environment |
-| `make configure` | Create/update local config interactively |
-| `make doctor` | Validate setup and prerequisites |
-| `make doctor-strict` | Strict check including Salesforce auth and KB config |
-| `make first-run` | Full setup sequence (setup + doctor + index + KB index) |
-| `make test` | Run Python unit tests |
-| `make smoke` | Run local smoke test (no org auth required) |
-| `make ai-check-python` | Verify all Python module imports |
+| Command | Windows (PowerShell) | Mac / Linux |
+|---|---|---|
+| Bootstrap workspace, create config and directories | `.\scripts\workspace.ps1 setup` | `make setup` |
+| Setup + create Python virtual environment | _(use `make setup-venv`)_ | `make setup-venv` |
+| Create/update local config interactively | `.\scripts\workspace.ps1 configure` | `make configure` |
+| Validate setup and prerequisites | `.\scripts\workspace.ps1 doctor` | `make doctor` |
+| Strict check including Salesforce auth and KB config | `.\scripts\workspace.ps1 doctor-strict` | `make doctor-strict` |
+| Full setup sequence (setup + doctor + index + KB index) | `.\scripts\workspace.ps1 first-run` | `make first-run` |
+| Run Python unit tests | `.\scripts\workspace.ps1 test` | `make test` |
+| Run local smoke test (no org auth required) | _(use `make smoke`)_ | `make smoke` |
+| Verify all Python module imports | _(use `make ai-check-python`)_ | `make ai-check-python` |
 
 ### Indexing
 
-| Command | Auth Required | Output |
-|---|---|---|
-| `make ai-index-repo` | No | `metadata-components.jsonl` |
-| `make ai-index-schema ORG=IntDev` | Yes (SF CLI) | SObject, field, relationship cards |
-| `make ai-index-config ORG=IntDev` | Yes (SF CLI) | Config record cards (masked) |
-| `make ai-index-all ORG=IntDev` | Yes (schema/config) | All indexes |
+| Windows (PowerShell) | Mac / Linux | Auth Required | Output |
+|---|---|---|---|
+| `.\scripts\workspace.ps1 ai-index-repo` | `make ai-index-repo` | No | `metadata-components.jsonl` |
+| `.\scripts\workspace.ps1 ai-index-schema -Org IntDev` | `make ai-index-schema ORG=IntDev` | Yes (SF CLI) | SObject, field, relationship cards |
+| `.\scripts\workspace.ps1 ai-index-config -Org IntDev` | `make ai-index-config ORG=IntDev` | Yes (SF CLI) | Config record cards (masked) |
+| `.\scripts\workspace.ps1 ai-index-all -Org IntDev` | `make ai-index-all ORG=IntDev` | Yes (schema/config) | All indexes |
 
 ### Context Management
 
-| Command | Purpose |
-|---|---|
-| `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` | Build context pack from all indexes |
-| `make ai-context-example` | Build example context for `EXAMPLE-WI` |
-| `make ai-list-outputs WORK_ITEM=<ID>` | List all generated outputs for a Work Item |
-| `make ai-clean-context` | Delete all generated index files |
-| `make clean-ai-generated` | Delete all AI-generated outputs |
+| Windows (PowerShell) | Mac / Linux | Purpose |
+|---|---|---|
+| `.\scripts\workspace.ps1 ai-context -WorkItem <ID> -Query "<topic>"` | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` | Build context pack from all indexes |
+| _(use `make ai-context-example`)_ | `make ai-context-example` | Build example context for `EXAMPLE-WI` |
+| _(use `make ai-list-outputs WORK_ITEM=<ID>`)_ | `make ai-list-outputs WORK_ITEM=<ID>` | List all generated outputs for a Work Item |
+| _(use `make ai-clean-context`)_ | `make ai-clean-context` | Delete all generated index files |
+| _(use `make clean-ai-generated`)_ | `make clean-ai-generated` | Delete all AI-generated outputs |
 
 ### Knowledge Base
 
-| Command | Purpose |
-|---|---|
-| `make knowledge-sync-dry-run KB_REPO=<url>` | Preview sync (no changes) |
-| `make knowledge-sync KB_REPO=<url>` | Sync external KB to `.ai/knowledge/` |
-| `make knowledge-index` | Rebuild `knowledge-cards.jsonl` |
-| `make knowledge-search QUERY="<topic>"` | Search knowledge index |
-| `make knowledge-import KNOWLEDGE_SOURCE=<file> KNOWLEDGE_DOMAIN=<domain> KNOWLEDGE_TITLE="<title>"` | Import source file as KB note |
-| `make knowledge-import-manifest KNOWLEDGE_MANIFEST=<yaml>` | Batch import from manifest |
-| `make knowledge-push-dry-run KB_REPO=<url>` | Preview push (no changes) |
-| `make knowledge-push KB_REPO=<url>` | Push curated notes to external KB repo |
+| Windows (PowerShell) | Mac / Linux | Purpose |
+|---|---|---|
+| `.\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "<url>"` | `make knowledge-sync-dry-run KB_REPO=<url>` | Preview sync (no changes) |
+| `.\scripts\workspace.ps1 knowledge-sync -KbRepo "<url>"` | `make knowledge-sync KB_REPO=<url>` | Sync external KB to `.ai/knowledge/` |
+| `.\scripts\workspace.ps1 knowledge-index` | `make knowledge-index` | Rebuild `knowledge-cards.jsonl` |
+| `.\scripts\workspace.ps1 knowledge-search -Query "invoice approval"` | `make knowledge-search QUERY="<topic>"` | Search knowledge index |
+| `.\scripts\workspace.ps1 knowledge-import -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle "<title>"` | `make knowledge-import KNOWLEDGE_SOURCE=<file> KNOWLEDGE_DOMAIN=<domain> KNOWLEDGE_TITLE="<title>"` | Import source file as KB note |
+| _(use `make knowledge-import-manifest`)_ | `make knowledge-import-manifest KNOWLEDGE_MANIFEST=<yaml>` | Batch import from manifest |
+| `.\scripts\workspace.ps1 knowledge-push-dry-run -KbRepo "<url>"` | `make knowledge-push-dry-run KB_REPO=<url>` | Preview push (no changes) |
+| `.\scripts\workspace.ps1 knowledge-push -KbRepo "<url>"` | `make knowledge-push KB_REPO=<url>` | Push curated notes to external KB repo |
 
 ### Work Item Validation
 
-| Command | Purpose |
-|---|---|
-| `make wi-precheck WORK_ITEM=<ID> BASE_REF=HEAD~1` | Advisory pre-promote check |
-| `make wi-precheck-strict WORK_ITEM=<ID> BASE_REF=origin/main` | Strict check (fails on high findings) |
-| `make config-impact WORK_ITEM=<ID>` | Analyze config record impact |
-| `make config-pack-skeleton WORK_ITEM=<ID>` | Build config review skeleton |
+| Windows (PowerShell) | Mac / Linux | Purpose |
+|---|---|---|
+| `.\scripts\workspace.ps1 wi-precheck -WorkItem <ID> -BaseRef HEAD~1` | `make wi-precheck WORK_ITEM=<ID> BASE_REF=HEAD~1` | Advisory pre-promote check |
+| `.\scripts\workspace.ps1 wi-precheck-strict -WorkItem <ID> -BaseRef origin/main` | `make wi-precheck-strict WORK_ITEM=<ID> BASE_REF=origin/main` | Strict check (fails on high findings) |
+| `.\scripts\workspace.ps1 config-impact -WorkItem <ID>` | `make config-impact WORK_ITEM=<ID>` | Analyze config record impact |
+| `.\scripts\workspace.ps1 config-pack-skeleton -WorkItem <ID>` | `make config-pack-skeleton WORK_ITEM=<ID>` | Build config review skeleton |
 
 ### Azure Wiki
 
-| Command | Purpose |
-|---|---|
-| `make wiki-dry-run WORK_ITEM=<ID> WIKI_TITLE="<title>" WIKI_SOURCE=<path> AZURE_WIKI_REPO=<url>` | Preview wiki page |
-| `make wiki-prepare-branch ...` | Prepare local draft branch |
-| `make wiki-push-approved ... WIKI_APPROVAL_NOTE="<note>"` | Push approved branch |
-| `make wiki-scan` | Scan local wiki vendor clone structure |
+| Windows (PowerShell) | Mac / Linux | Purpose |
+|---|---|---|
+| `.\scripts\workspace.ps1 wiki-dry-run -WorkItem <ID> -WikiTitle "<title>" -WikiSource <path> -AzureWikiRepo "<url>"` | `make wiki-dry-run WORK_ITEM=<ID> WIKI_TITLE="<title>" WIKI_SOURCE=<path> AZURE_WIKI_REPO=<url>` | Preview wiki page |
+| `.\scripts\workspace.ps1 wiki-prepare-branch -WorkItem ... -WikiTitle "..." -WikiSource ... -AzureWikiRepo "<url>"` | `make wiki-prepare-branch ...` | Prepare local draft branch |
+| `.\scripts\workspace.ps1 wiki-push-approved ... -WikiApprovalNote "..."` | `make wiki-push-approved ... WIKI_APPROVAL_NOTE="<note>"` | Push approved branch |
+| `.\scripts\workspace.ps1 wiki-scan` | `make wiki-scan` | Scan local wiki vendor clone structure |
 
 ### Documentation
 
-| Command | Purpose |
-|---|---|
-| `make docs-build` | Validate documentation package |
-| `make docs-export-pdf` | Export workspace docs to PDF |
-| `make docs-pack` | Build + export |
-| `make docs-open-html` | Print path to offline HTML runbook |
+| Windows (PowerShell) | Mac / Linux | Purpose |
+|---|---|---|
+| `.\scripts\workspace.ps1 docs-build` | `make docs-build` | Validate documentation package |
+| `.\scripts\workspace.ps1 docs-export-pdf` | `make docs-export-pdf` | Export workspace docs to PDF |
+| _(use `make docs-pack`)_ | `make docs-pack` | Build + export |
+| _(use `make docs-open-html`)_ | `make docs-open-html` | Print path to offline HTML runbook |
 
 ### MCP Server
 
-| Command | Purpose |
-|---|---|
-| `make mcp-salesforce-context` | Start Salesforce context MCP server |
-| `make mcp-smoke-test` | Test MCP server (list tools via JSON-RPC) |
+| Windows (PowerShell) | Mac / Linux | Purpose |
+|---|---|---|
+| _(use `make mcp-salesforce-context`)_ | `make mcp-salesforce-context` | Start Salesforce context MCP server |
+| _(use `make mcp-smoke-test`)_ | `make mcp-smoke-test` | Test MCP server (list tools via JSON-RPC) |
 
 ---
 
@@ -938,7 +1050,9 @@ make mcp-smoke-test
 
 ---
 
-## 12. Windows Users Guide
+## 12. Windows Users Guide — PowerShell Command Summary
+
+> This section is a consolidated quick-reference summary of all PowerShell commands. Throughout this guide, every command block already shows the Windows (PowerShell) version first, followed by Mac / Linux — this section collects them all in one place for easy lookup.
 
 All workspace functionality is available on Windows through the PowerShell wrapper.
 
@@ -1196,23 +1310,43 @@ ERROR: Python 3.11+ required
 2. Install Python 3.11+ from [python.org](https://www.python.org/)
 3. On Mac with Homebrew: `brew install python@3.11`
 
-### Import Errors
+### Import Errors / PYTHONPATH Issues
 
-If Python imports fail, ensure `PYTHONPATH` is set:
+The recommended fix is to install the package in editable mode — this eliminates the need to set `PYTHONPATH` manually:
+
+```powershell
+# Windows (PowerShell)
+pip install -e .
+```
+
+```bash
+# Mac / Linux
+pip install -e .
+```
+
+If you cannot use `pip install -e .`, ensure `PYTHONPATH` is set manually:
 
 ```bash
 PYTHONPATH=.ai/skills/python python3 -c "import ai_workspace; print('OK')"
 ```
 
-Always run commands through `make` or `.\scripts\workspace.ps1` — they set `PYTHONPATH` automatically.
+Always run commands through `.\scripts\workspace.ps1` (Windows) or `make` (Mac/Linux) — they set `PYTHONPATH` automatically.
 
-### Make Not Found (Windows)
+### Running Commands on Windows
 
-Use the PowerShell wrapper instead:
+On Windows, use the PowerShell wrapper instead of `make`:
 
 ```powershell
-.\scripts\workspace.ps1 <target>
+# Windows (PowerShell) — primary way to run all commands
+.\scripts\workspace.ps1 <command>
 ```
+
+```bash
+# Mac / Linux
+make <command>
+```
+
+`make` is not installed by default on Windows. If you prefer `make`, install it via Chocolatey (`choco install make`) or use WSL — but the PowerShell wrapper is the recommended approach and requires no additional tools.
 
 ### Salesforce CLI Auth Error
 

@@ -2,6 +2,8 @@
 
 This runbook maps the workspace to a normal Salesforce delivery flow. It assumes DevOps Center remains the official metadata promotion mechanism.
 
+> **Platform note:** All commands shown Windows (PowerShell) first, followed by Mac / Linux. VS Code Tasks are also available: Ctrl+Shift+P → Tasks: Run Task
+
 ## 1. Intake / Work Item
 
 Start from a DevOps Center Work Item branch and a real Azure DevOps Work Item or pasted requirement.
@@ -36,26 +38,47 @@ All estimates are advisory and require human validation.
 
 Local metadata:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-index-repo
+```
 ```bash
+# Mac / Linux
 make ai-index-repo
 ```
 
 Optional org schema and config cards:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-index-schema -Org IntDev
+.\scripts\workspace.ps1 ai-index-config -Org IntDev
+```
 ```bash
+# Mac / Linux
 make ai-index-schema ORG=IntDev
 make ai-index-config ORG=IntDev
 ```
 
 Knowledge Base:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-index
+```
 ```bash
+# Mac / Linux
 make knowledge-index
 ```
 
 Context pack:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 ai-context -WorkItem KIM-1234 -Query "invoice approval"
+```
 ```bash
+# Mac / Linux
 make ai-context WORK_ITEM=KIM-1234 QUERY="invoice approval"
 ```
 
@@ -122,13 +145,23 @@ Rules:
 
 ## 7. Local Precheck
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wi-precheck -WorkItem KIM-1234 -BaseRef HEAD~1
+```
 ```bash
+# Mac / Linux
 make wi-precheck WORK_ITEM=KIM-1234 BASE_REF=HEAD~1
 ```
 
 Strict mode can fail on high findings:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wi-precheck-strict -WorkItem KIM-1234 -BaseRef origin/main
+```
 ```bash
+# Mac / Linux
 make wi-precheck-strict WORK_ITEM=KIM-1234 BASE_REF=origin/main
 ```
 
@@ -170,7 +203,12 @@ QA docs should include:
 
 ## 10. Config Impact
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 config-impact -WorkItem KIM-1234
+```
 ```bash
+# Mac / Linux
 make config-impact WORK_ITEM=KIM-1234
 make config-pack-skeleton WORK_ITEM=KIM-1234
 ```
@@ -216,19 +254,34 @@ Human approval remains required for:
 
 Dry run:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wiki-dry-run -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<wiki-repo>"
+```
 ```bash
+# Mac / Linux
 make wiki-dry-run WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval Routing" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<wiki-repo>
 ```
 
 Prepare local draft branch:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wiki-prepare-branch -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<wiki-repo>"
+```
 ```bash
+# Mac / Linux
 make wiki-prepare-branch WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval Routing" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<wiki-repo>
 ```
 
 Push approved branch only after human approval and local enablement:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 wiki-push-approved -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<wiki-repo>" -WikiApprovalNote "Approved by <reviewer/date>"
+```
 ```bash
+# Mac / Linux
 make wiki-push-approved WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval Routing" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<wiki-repo> WIKI_APPROVAL_NOTE="Approved by <reviewer/date>"
 ```
 

@@ -1,5 +1,7 @@
 # Knowledge Base Runbook
 
+> **Platform note:** All commands shown Windows (PowerShell) first, followed by Mac / Linux. VS Code Tasks are also available: Ctrl+Shift+P → Tasks: Run Task
+
 ## Why The Knowledge Base Exists
 
 KimbleOne/Kantata is a closed managed package. The workspace cannot inspect package internals. The Knowledge Base gives teams a controlled way to reuse reviewed knowledge from exposed behavior, schema, configuration, tests, documentation, and owner validation.
@@ -28,25 +30,45 @@ This path is ignored.
 
 Dry run:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "<repo-url-or-local-path>"
+```
 ```bash
+# Mac / Linux
 make knowledge-sync-dry-run KB_REPO=<repo-url-or-local-path>
 ```
 
 Sync:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-sync -KbRepo "<repo-url-or-local-path>"
+```
 ```bash
+# Mac / Linux
 make knowledge-sync KB_REPO=<repo-url-or-local-path>
 ```
 
 Index:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-index
+```
 ```bash
+# Mac / Linux
 make knowledge-index
 ```
 
 Search:
 
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-search -Query "invoice approval"
+```
 ```bash
+# Mac / Linux
 make knowledge-search QUERY="invoice approval"
 ```
 

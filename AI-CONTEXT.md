@@ -382,71 +382,72 @@ Use in VS Code with `/prompt-name` or attach in Copilot Chat.
 
 ## 10. Commands Reference
 
-### Mac / Linux (make)
+### Windows (PowerShell — `scripts/workspace.ps1`)
 
-```bash
+```powershell
 # Setup
-make setup                              # Bootstrap workspace
-make setup-venv                         # Bootstrap + create venv
-make configure                          # Interactive configuration
-make doctor                             # Health check
-make doctor-strict                      # Health check + Salesforce auth + KB
-make first-run                          # setup + doctor + index-repo + knowledge-index
+.\scripts\workspace.ps1 setup                                          # Bootstrap workspace
+.\scripts\workspace.ps1 setup-venv                                     # Bootstrap + create venv
+.\scripts\workspace.ps1 configure                                      # Interactive configuration
+.\scripts\workspace.ps1 doctor                                         # Health check
+.\scripts\workspace.ps1 doctor-strict                                  # Health check + Salesforce auth + KB
+.\scripts\workspace.ps1 first-run                                      # setup + doctor + index-repo + knowledge-index
 
 # Testing
-make test                               # Run Python unit tests
-make smoke                              # Full smoke test suite
-make ai-check-python                    # Verify all Python imports work
+.\scripts\workspace.ps1 test                                           # Run Python unit tests
+.\scripts\workspace.ps1 smoke                                          # Full smoke test suite
+.\scripts\workspace.ps1 ai-check-python                                # Verify all Python imports work
 
 # Indexing (requires Salesforce CLI auth for schema/config)
-make ai-index-repo                      # Index repo metadata
-make ai-index-schema ORG=IntDev         # Index Salesforce org schema
-make ai-index-config ORG=IntDev         # Index config records (masked)
-make ai-index-all ORG=IntDev            # All three indexes
+.\scripts\workspace.ps1 ai-index-repo                                  # Index repo metadata
+.\scripts\workspace.ps1 ai-index-schema -Org IntDev                   # Index Salesforce org schema
+.\scripts\workspace.ps1 ai-index-config -Org IntDev                   # Index config records (masked)
+.\scripts\workspace.ps1 ai-index-all -Org IntDev                      # All three indexes
 
 # Context packs
-make ai-context WORK_ITEM=KIM-1234 QUERY="invoice approval"
-make ai-context-example                 # Example with EXAMPLE-WI
+.\scripts\workspace.ps1 ai-context -WorkItem KIM-1234 -Query "invoice approval"
+.\scripts\workspace.ps1 ai-context-example                             # Example with EXAMPLE-WI
 
 # Config analysis
-make config-impact WORK_ITEM=KIM-1234
-make config-pack-skeleton WORK_ITEM=KIM-1234
+.\scripts\workspace.ps1 config-impact -WorkItem KIM-1234
+.\scripts\workspace.ps1 config-pack-skeleton -WorkItem KIM-1234
 
 # Knowledge base
-make knowledge-sync KB_REPO=https://github.com/Vescik/Salesforce-knowledge-base.git
-make knowledge-sync-dry-run KB_REPO=https://github.com/Vescik/Salesforce-knowledge-base.git
-make knowledge-index
-make knowledge-import KNOWLEDGE_SOURCE=.ai/knowledge/imports/note.txt KNOWLEDGE_DOMAIN=billing KNOWLEDGE_TITLE="Invoice Rules"
-make knowledge-import-manifest KNOWLEDGE_MANIFEST=.ai/templates/knowledge-import-manifest.yaml
-make knowledge-search QUERY="invoice approval"
+.\scripts\workspace.ps1 knowledge-sync -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
+.\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
+.\scripts\workspace.ps1 knowledge-index
+.\scripts\workspace.ps1 knowledge-import -KnowledgeSource ".ai/knowledge/imports/note.txt" -KnowledgeDomain billing -KnowledgeTitle "Invoice Rules"
+.\scripts\workspace.ps1 knowledge-search -Query "invoice approval"
+.\scripts\workspace.ps1 knowledge-push-dry-run -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
+.\scripts\workspace.ps1 knowledge-push -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
 
 # Work Item pre-promote checks
-make wi-precheck WORK_ITEM=KIM-1234 BASE_REF=HEAD~1
-make wi-precheck-strict WORK_ITEM=KIM-1234 BASE_REF=origin/main
-make wi-scope-check WORK_ITEM=KIM-1234 BASE_REF=HEAD~1
+.\scripts\workspace.ps1 wi-precheck -WorkItem KIM-1234 -BaseRef HEAD~1
+.\scripts\workspace.ps1 wi-precheck-strict -WorkItem KIM-1234 -BaseRef origin/main
+.\scripts\workspace.ps1 wi-scope-check -WorkItem KIM-1234 -BaseRef HEAD~1
 
-# Azure Wiki (AZURE_WIKI_REPO = Azure DevOps Wiki git URL)
-make wiki-dry-run WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<url>
-make wiki-prepare-branch WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<url>
-make wiki-push-approved WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<url> WIKI_APPROVAL_NOTE="Approved by Name/2026-06-13"
-make wiki-scan AZURE_WIKI_VENDOR_DIR=.ai/vendor/azure-wiki
+# Azure Wiki (AzureWikiRepo = Azure DevOps Wiki git URL)
+.\scripts\workspace.ps1 wiki-dry-run -WorkItem KIM-1234 -WikiTitle "Invoice Approval" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<url>"
+.\scripts\workspace.ps1 wiki-prepare-branch -WorkItem KIM-1234 -WikiTitle "Invoice Approval" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<url>"
+.\scripts\workspace.ps1 wiki-push-approved -WorkItem KIM-1234 -WikiTitle "Invoice Approval" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<url>" -WikiApprovalNote "Approved by Name/2026-06-13"
+.\scripts\workspace.ps1 wiki-scan
 
 # Docs
-make docs-build
-make docs-export-pdf
-make docs-pack
+.\scripts\workspace.ps1 docs-build
+.\scripts\workspace.ps1 docs-export-pdf
+.\scripts\workspace.ps1 docs-pack
 
 # MCP
-make mcp-salesforce-context             # Start MCP server
-make mcp-smoke-test                     # Test MCP tools/list
+.\scripts\workspace.ps1 mcp-salesforce-context                        # Start MCP server
+.\scripts\workspace.ps1 mcp-smoke-test                                 # Test MCP tools/list
 
 # Cleanup
-make ai-clean-context                   # Remove generated index/context files
-make clean-ai-generated                 # Remove all AI outputs
-make ai-list-outputs WORK_ITEM=KIM-1234 # List generated files
+.\scripts\workspace.ps1 ai-clean-context                               # Remove generated index/context files
+.\scripts\workspace.ps1 clean-ai-generated                             # Remove all AI outputs
+.\scripts\workspace.ps1 ai-list-outputs -WorkItem KIM-1234             # List generated files
 ```
 
-### Windows (PowerShell — `scripts/workspace.ps1`)
+### Mac / Linux (make)
 
 Exact equivalent for every make target. Usage:
 
