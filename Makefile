@@ -22,6 +22,7 @@ KB_BRANCH ?= main
 KB_VENDOR_DIR ?= .ai/vendor/knowledge-base
 KNOWLEDGE_ROOT ?= .ai/knowledge
 KNOWLEDGE_POLICY ?= .ai/knowledge/sync-policy.yaml
+KNOWLEDGE_PUSH_MESSAGE ?=
 KNOWLEDGE_INDEX ?= .ai/context/index/knowledge-cards.jsonl
 KNOWLEDGE_SOURCE ?=
 KNOWLEDGE_MANIFEST ?= .ai/templates/knowledge-import-manifest.yaml
@@ -40,7 +41,7 @@ WIKI_APPROVAL_NOTE ?=
 DOCS_ROOT ?= docs/workspace
 DOCS_HTML ?= $(DOCS_ROOT)/html/index.html
 
-.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
+.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
 
 help:
 	@echo "Copilot-only Salesforce AI Workspace commands"
@@ -69,6 +70,8 @@ help:
 	@echo "  make knowledge-import-manifest KNOWLEDGE_MANIFEST=.ai/templates/knowledge-import-manifest.yaml"
 	@echo "  make knowledge-index"
 	@echo "  make knowledge-search QUERY=\"invoice approval\""
+	@echo "  make knowledge-push-dry-run KB_REPO=<git-url>"
+	@echo "  make knowledge-push KB_REPO=<git-url>"
 	@echo "  make wiki-dry-run WORK_ITEM=KIM-1234 WIKI_TITLE=\"Invoice Approval Routing\" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<repo>"
 	@echo "  make wiki-prepare-branch WORK_ITEM=KIM-1234 WIKI_TITLE=\"Invoice Approval Routing\" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<repo>"
 	@echo "  make wiki-push-approved WORK_ITEM=KIM-1234 WIKI_TITLE=\"Invoice Approval Routing\" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<repo> WIKI_APPROVAL_NOTE=\"Approved by <name/date>\""
@@ -247,6 +250,24 @@ knowledge-search:
 		--query "$(QUERY)" \
 		--index "$(KNOWLEDGE_INDEX)" \
 		--top-k 10
+
+knowledge-push-dry-run:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.push_knowledge \
+		--vendor-dir "$(KB_VENDOR_DIR)" \
+		--knowledge-root "$(KNOWLEDGE_ROOT)" \
+		--repo-url "$(KB_REPO)" \
+		--branch "$(KB_BRANCH)" \
+		--message "$(KNOWLEDGE_PUSH_MESSAGE)" \
+		--dry-run
+
+knowledge-push:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.push_knowledge \
+		--vendor-dir "$(KB_VENDOR_DIR)" \
+		--knowledge-root "$(KNOWLEDGE_ROOT)" \
+		--repo-url "$(KB_REPO)" \
+		--branch "$(KB_BRANCH)" \
+		--message "$(KNOWLEDGE_PUSH_MESSAGE)" \
+		--push
 
 wiki-dry-run:
 	@test -n "$(AZURE_WIKI_REPO)" || (echo "ERROR: AZURE_WIKI_REPO is required for wiki-dry-run." >&2; exit 2)

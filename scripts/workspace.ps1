@@ -56,7 +56,8 @@ param(
     [string]$WikiModule           = "",
     [string]$WikiTargetPath       = "",
     [string]$WikiApprovalNote     = "",
-    [string]$DocsRoot             = "docs/workspace"
+    [string]$DocsRoot             = "docs/workspace",
+    [string]$KnowledgePushMessage = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -127,6 +128,8 @@ function Invoke-Help {
     Write-Host "  knowledge-import             -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle <title>"
     Write-Host "  knowledge-import-manifest    -KnowledgeManifest <yaml>"
     Write-Host "  knowledge-search             -Query 'invoice approval'"
+    Write-Host "  knowledge-push-dry-run       -KbRepo <git-url>"
+    Write-Host "  knowledge-push               -KbRepo <git-url>"
     Write-Host "  wiki-dry-run                 -WorkItem KIM-1234 -WikiTitle '...' -WikiSource docs/... -AzureWikiRepo <url>"
     Write-Host "  wiki-prepare-branch          -WorkItem KIM-1234 -WikiTitle '...' -WikiSource docs/... -AzureWikiRepo <url>"
     Write-Host "  wiki-push-approved           -WorkItem KIM-1234 -WikiTitle '...' -WikiSource docs/... -AzureWikiRepo <url> -WikiApprovalNote 'Approved by ...'"
@@ -415,6 +418,33 @@ function Invoke-KnowledgeSearch {
     )
 }
 
+function Invoke-KnowledgePushDryRun {
+    $a = @(
+        "-m", "ai_workspace.knowledge.push_knowledge",
+        "--vendor-dir", $KbVendorDir,
+        "--knowledge-root", $KnowledgeRoot,
+        "--repo-url", $KbRepo,
+        "--branch", $KbBranch,
+        "--dry-run"
+    )
+    if ($KnowledgePushMessage) { $a += "--message", $KnowledgePushMessage }
+    Invoke-Py $a
+}
+
+function Invoke-KnowledgePush {
+    Require-Param $KbRepo "KbRepo"
+    $a = @(
+        "-m", "ai_workspace.knowledge.push_knowledge",
+        "--vendor-dir", $KbVendorDir,
+        "--knowledge-root", $KnowledgeRoot,
+        "--repo-url", $KbRepo,
+        "--branch", $KbBranch,
+        "--push"
+    )
+    if ($KnowledgePushMessage) { $a += "--message", $KnowledgePushMessage }
+    Invoke-Py $a
+}
+
 function Invoke-WikiDryRun {
     Require-Param $AzureWikiRepo "AzureWikiRepo"
     Invoke-Py @(
@@ -568,6 +598,8 @@ switch ($Target) {
     "knowledge-import"        { Invoke-KnowledgeImport }
     "knowledge-import-manifest" { Invoke-KnowledgeImportManifest }
     "knowledge-search"        { Invoke-KnowledgeSearch }
+    "knowledge-push-dry-run"  { Invoke-KnowledgePushDryRun }
+    "knowledge-push"          { Invoke-KnowledgePush }
     "wiki-dry-run"            { Invoke-WikiDryRun }
     "wiki-prepare-branch"     { Invoke-WikiPrepareBranch }
     "wiki-push-approved"      { Invoke-WikiPushApproved }
