@@ -9,8 +9,9 @@ Phase 2 adds:
 - Tie-break by knowledge quality (status → confidence → recency) when scores
   are within 0.001 of each other.
 
-Synonym expansion is opt-in via the ``synonyms`` flag on ``search_jsonl`` —
-loaded from ``.ai/config/search-synonyms.yaml`` (see ``search.synonyms``).
+Synonym expansion is opt-in via the ``synonyms`` flag on ``search_jsonl``.
+Pass ``synonyms=True`` to load ``.ai/config/search-synonyms.yaml`` or pass a
+specific synonym map.
 """
 
 from __future__ import annotations
@@ -150,14 +151,15 @@ def search_jsonl(
     limit: int,
     *,
     mode: str = "legacy",
-    synonyms: dict[str, tuple[str, ...]] | None = None,
+    synonyms: dict[str, tuple[str, ...]] | bool | None = False,
     corpus_stats: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Search a JSONL file and return top matching records.
 
     Pass ``mode="bm25"`` for BM25 ranking (will lazy-build corpus stats from
-    ``path`` if ``corpus_stats`` is None). Pass ``synonyms`` (or rely on the
-    default ``.ai/config/search-synonyms.yaml``) to expand the query.
+    ``path`` if ``corpus_stats`` is None). Pass ``synonyms=True`` to expand the
+    query with the default ``.ai/config/search-synonyms.yaml`` map, or pass an
+    explicit synonym dictionary.
     """
 
     if limit < 1:
@@ -295,11 +297,13 @@ def _safe_mtime(path: Path) -> int:
         return 0
 
 
-def _expand_query_lazy(query: str, synonyms: dict[str, tuple[str, ...]] | None) -> str:
-    if synonyms is False:  # type: ignore[comparison-overlap]
+def _expand_query_lazy(query: str, synonyms: dict[str, tuple[str, ...]] | bool | None) -> str:
+    if synonyms is False:
         return query
     from ai_workspace.search.synonyms import expand_query
 
+    if synonyms is True or synonyms is None:
+        return expand_query(query)
     return expand_query(query, synonyms)
 
 

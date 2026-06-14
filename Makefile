@@ -10,7 +10,7 @@ QUERY ?= field ui visibility flow config
 INDEX_DIR ?= .ai/context/index
 WORK_ITEM_DIR ?= .ai/context/work-items/$(WORK_ITEM)
 PYTHONPATH_VALUE ?= .ai/skills/python
-PYTHON ?= python3
+PYTHON ?= $(shell command -v python3.11 >/dev/null 2>&1 && printf python3.11 || (command -v python3 >/dev/null 2>&1 && printf python3 || printf python))
 WORKSPACE_CONFIG ?= .ai/config/workspace.local.json
 REGISTRY ?= config/data-promotion/config-object-registry.yaml
 MASKING_POLICY ?= config/data-promotion/masking-policy.yaml
@@ -231,7 +231,7 @@ ai-list-outputs:
 	@find $(WORK_ITEM_DIR) -maxdepth 2 -type f 2>/dev/null | sort || true
 
 ai-check-python:
-	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -c "import ai_workspace.configuration.workspace_config; import ai_workspace.configuration.bootstrap; import ai_workspace.configuration.doctor; import ai_workspace.indexers.index_repo_metadata; import ai_workspace.indexers.index_org_schema; import ai_workspace.indexers.index_config_records; import ai_workspace.indexers.build_context_pack; import ai_workspace.deployment.precheck_work_item; import ai_workspace.config.config_impact; import ai_workspace.config.config_pack_builder; import ai_workspace.config.config_diff; import ai_workspace.knowledge.import_knowledge; import ai_workspace.knowledge.sync_knowledge_repo; import ai_workspace.knowledge.index_knowledge; import ai_workspace.knowledge.knowledge_search; import ai_workspace.wiki.wiki_config; import ai_workspace.wiki.wiki_git; import ai_workspace.wiki.wiki_scanner; import ai_workspace.wiki.wiki_router; import ai_workspace.wiki.wiki_page_builder; import ai_workspace.wiki.wiki_publisher; import ai_workspace.docs.export_docs; import ai_workspace.mcp.salesforce_context_mcp; print('AI workspace Python imports OK')"
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -c "import ai_workspace.configuration.workspace_config; import ai_workspace.configuration.bootstrap; import ai_workspace.configuration.doctor; import ai_workspace.indexers.index_repo_metadata; import ai_workspace.indexers.index_org_schema; import ai_workspace.indexers.index_config_records; import ai_workspace.indexers.build_context_pack; import ai_workspace.knowledge.extract_ac_keywords; import ai_workspace.deployment.ac_coverage_check; import ai_workspace.deployment.design_lint; import ai_workspace.deployment.precheck_work_item; import ai_workspace.config.config_impact; import ai_workspace.config.config_pack_builder; import ai_workspace.config.config_diff; import ai_workspace.knowledge.import_knowledge; import ai_workspace.knowledge.sync_knowledge_repo; import ai_workspace.knowledge.index_knowledge; import ai_workspace.knowledge.knowledge_search; import ai_workspace.knowledge.validate_knowledge; import ai_workspace.knowledge.metadata_to_knowledge; import ai_workspace.knowledge.build_graph; import ai_workspace.wiki.wiki_config; import ai_workspace.wiki.wiki_git; import ai_workspace.wiki.wiki_scanner; import ai_workspace.wiki.wiki_router; import ai_workspace.wiki.wiki_page_builder; import ai_workspace.wiki.wiki_publisher; import ai_workspace.docs.export_docs; import ai_workspace.mcp.salesforce_context_mcp; print('AI workspace Python imports OK')"
 
 config-impact:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.config.config_impact \

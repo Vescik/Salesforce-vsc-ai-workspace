@@ -70,9 +70,14 @@ Open Copilot Chat and type `/fetch-us YOUR-WORK-ITEM-ID` to begin.
 | Context indexing | `make ai-index-repo` |
 | Index all (schema + config) | `make ai-index-all ORG=IntDev` |
 | Build context pack | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` |
+| Build context from AC keywords | `make ai-context-auto WORK_ITEM=<ID>` |
 | Knowledge Base sync | `make knowledge-sync KB_REPO=<url>` |
+| Knowledge Base validation | `make knowledge-validate` |
+| Knowledge graph | `make knowledge-graph` |
 | Knowledge Base push | `make knowledge-push KB_REPO=<url>` |
 | KB search | `make knowledge-search QUERY="<topic>"` |
+| AC coverage check | `make ac-coverage WORK_ITEM=<ID>` |
+| Solution design lint | `make design-lint WORK_ITEM=<ID>` |
 | Pre-promote check | `make wi-precheck WORK_ITEM=<ID>` |
 | Config impact | `make config-impact WORK_ITEM=<ID>` |
 | Wiki draft | `make wiki-dry-run WORK_ITEM=<ID> ...` |

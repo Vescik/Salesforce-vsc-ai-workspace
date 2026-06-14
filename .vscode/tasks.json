@@ -110,9 +110,27 @@
       "problemMatcher": []
     },
     {
+      "label": "AI: Build Context Pack From AC",
+      "type": "shell",
+      "command": "make ai-context-auto WORK_ITEM=${input:workItemId}",
+      "problemMatcher": []
+    },
+    {
       "label": "AI: Build Example Context Pack",
       "type": "shell",
       "command": "make ai-context-example",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Check AC Coverage",
+      "type": "shell",
+      "command": "make ac-coverage WORK_ITEM=${input:workItemId}",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Lint Solution Design",
+      "type": "shell",
+      "command": "make design-lint WORK_ITEM=${input:workItemId}",
       "problemMatcher": []
     },
     {
@@ -185,6 +203,30 @@
       "label": "AI: Import Knowledge Manifest",
       "type": "shell",
       "command": "make knowledge-import-manifest KNOWLEDGE_MANIFEST=\"${input:knowledgeManifest}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Validate Knowledge Base",
+      "type": "shell",
+      "command": "make knowledge-validate",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Index Metadata Knowledge",
+      "type": "shell",
+      "command": "make metadata-knowledge-index",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Emit Knowledge YAML Index",
+      "type": "shell",
+      "command": "make knowledge-index-yaml",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Build Knowledge Graph",
+      "type": "shell",
+      "command": "make knowledge-graph",
       "problemMatcher": []
     },
     {
