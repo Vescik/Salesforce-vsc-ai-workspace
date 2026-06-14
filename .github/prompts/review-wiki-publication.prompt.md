@@ -1,5 +1,7 @@
 ---
+name: review-wiki-publication
 description: Human-review checklist for pushing an Azure Wiki draft branch.
+agent: azure-wiki-documentation-agent
 mode: ask
 ---
 

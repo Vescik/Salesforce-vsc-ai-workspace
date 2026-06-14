@@ -1,8 +1,38 @@
 # Developer Process Runbook
 
-This runbook maps the workspace to a normal Salesforce delivery flow. It assumes DevOps Center remains the official metadata promotion mechanism.
+> Platform note: all commands are shown Windows PowerShell first, followed by Mac/Linux only where the equivalent helps cross-platform operators. VS Code Tasks are also available from `Ctrl+Shift+P` -> `Tasks: Run Task`.
 
-> **Platform note:** All commands shown Windows (PowerShell) first, followed by Mac / Linux. VS Code Tasks are also available: Ctrl+Shift+P → Tasks: Run Task
+## Purpose
+
+Use this runbook to move a Salesforce/KimbleOne Work Item from intake through context, design, implementation support, validation, documentation, and release readiness. It assumes DevOps Center remains the official Salesforce metadata promotion mechanism.
+
+## When To Use
+
+Use this runbook for daily Work Item delivery when the team needs repeatable local context, Copilot-assisted drafts, deterministic checks, and human approval gates before DevOps Center promotion.
+
+Do not use this runbook to deploy Salesforce metadata, write Salesforce data, apply configuration records, bypass DevOps Center, or treat AI-generated output as approval.
+
+## Inputs
+
+- Azure DevOps Work Item ID, title, description, and acceptance criteria.
+- DevOps Center Work Item branch.
+- Local repository metadata and optional Salesforce schema/config indexes.
+- Relevant Knowledge Base notes and Work Item context pack.
+- Human-provided package behavior facts where repository evidence is incomplete.
+
+## Preconditions
+
+1. Run commands from the repository root.
+2. Verify local setup:
+
+```powershell
+.\scripts\workspace.ps1 doctor
+```
+
+3. Authenticate Salesforce CLI only when schema, config, or validate-only checks require org access.
+4. Confirm `.ai/config/workspace.local.json` remains local and uncommitted.
+
+## Operator Steps
 
 ## 1. Intake / Work Item
 
@@ -256,7 +286,7 @@ Dry run:
 
 ```powershell
 # Windows (PowerShell)
-.\scripts\workspace.ps1 wiki-dry-run -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<wiki-repo>"
+.\scripts\workspace.ps1 wiki-dry-run -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md
 ```
 ```bash
 # Mac / Linux
@@ -267,7 +297,7 @@ Prepare local draft branch:
 
 ```powershell
 # Windows (PowerShell)
-.\scripts\workspace.ps1 wiki-prepare-branch -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<wiki-repo>"
+.\scripts\workspace.ps1 wiki-prepare-branch -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md
 ```
 ```bash
 # Mac / Linux
@@ -278,7 +308,7 @@ Push approved branch only after human approval and local enablement:
 
 ```powershell
 # Windows (PowerShell)
-.\scripts\workspace.ps1 wiki-push-approved -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -AzureWikiRepo "<wiki-repo>" -WikiApprovalNote "Approved by <reviewer/date>"
+.\scripts\workspace.ps1 wiki-push-approved -WorkItem KIM-1234 -WikiTitle "Invoice Approval Routing" -WikiSource docs/architecture/KIM-1234.md -WikiApprovalNote "Approved by <reviewer/date>"
 ```
 ```bash
 # Mac / Linux
@@ -286,3 +316,65 @@ make wiki-push-approved WORK_ITEM=KIM-1234 WIKI_TITLE="Invoice Approval Routing"
 ```
 
 PR creation, merge, and final publication remain manual Azure DevOps steps.
+
+## Expected Outputs
+
+| Stage | Primary outputs |
+| --- | --- |
+| Intake | `.ai/context/work-items/<WORK_ITEM>/ado-work-item.json`, `work-item-summary.md`, `acceptance-criteria.md` |
+| Context | `.ai/context/work-items/<WORK_ITEM>/context-pack.md` and relevant source maps |
+| Design | Proposed solution design and review findings |
+| Work packets | Implementation-neutral packet list mapped to acceptance criteria |
+| Precheck | `.ai/outputs/precheck/` reports and advisory findings |
+| Documentation | Draft architecture docs and QA how-to-test files |
+| Release readiness | Pre-promote, release-readiness, and rollback-impact review outputs |
+| Wiki | Dry-run reports, local draft branches, and approval-gated feature branch pushes |
+
+## Review Gates
+
+- Work Item intake must include acceptance criteria or a clear missing-context note.
+- Solution design and design review require human validation before implementation planning.
+- Config impact is reviewed separately from Salesforce metadata impact.
+- QA how-to-test output requires human review before use by QA.
+- Release readiness reports are advisory; DevOps Center promotion remains a human decision.
+- Azure Wiki push requires explicit approval and local push enablement.
+
+## Troubleshooting
+
+Use [Troubleshooting Runbook](troubleshooting.md) when a command fails. For missing context, rebuild indexes and context in this order:
+
+```powershell
+.\scripts\workspace.ps1 ai-index-repo
+.\scripts\workspace.ps1 knowledge-index
+.\scripts\workspace.ps1 ai-context -WorkItem <WORK_ITEM> -Query "<topic>"
+```
+
+## Escalation
+
+Escalate to the Work Item owner, domain owner, or Salesforce Platform Team when:
+
+- Acceptance criteria are missing or contradictory.
+- The design depends on unsupported KimbleOne/Kantata internals.
+- Config impact is unknown or requires sidecar review.
+- Precheck reports high findings.
+- Release readiness depends on unreviewed draft knowledge.
+
+Keep a working record: command run, output path, finding, decision owner, and next action.
+
+## Safety Boundaries
+
+- No external model APIs or model orchestration tools.
+- No Salesforce deploy/write/apply actions from this workspace.
+- No configuration record apply tooling.
+- No hardcoded Salesforce record IDs.
+- No raw data dumps, logs, credentials, or local config committed.
+- No production deployment steps unless explicitly requested.
+
+## Maintenance
+
+- Update this runbook when command names, output paths, approval gates, or Work Item flow change.
+- Validate documentation after edits:
+
+```powershell
+.\scripts\workspace.ps1 docs-build
+```

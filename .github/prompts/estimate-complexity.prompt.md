@@ -1,6 +1,7 @@
 ---
 name: estimate-complexity
 description: Estimate the size and risk of a Salesforce/KimbleOne Work Item before solution design begins.
+agent: work-item-context-curator
 mode: ask
 argument-hint: <WORK_ITEM_ID>
 ---

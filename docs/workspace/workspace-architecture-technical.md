@@ -4,7 +4,7 @@ Audience: Salesforce developers, DevSecOps engineers, maintainers, and architect
 
 ## Architecture Overview
 
-The workspace is a file-based, Copilot-only assistant layer inside a Salesforce DX repository. It combines prompt files, custom agents, local standard-library Python tools, Makefile commands, VS Code tasks, MCP configuration, and GitHub validation workflows.
+The workspace is a file-based, Copilot-only assistant layer inside a Salesforce DX repository. It combines prompt files, custom agents, local standard-library Python tools, the Windows PowerShell command surface, VS Code tasks, MCP configuration, and GitHub validation workflows.
 
 The system is intentionally local-first. It writes indexes and reports to repository folders, avoids external LLM APIs, and keeps Salesforce writes out of scope.
 
@@ -14,7 +14,7 @@ The system is intentionally local-first. It writes indexes and reports to reposi
 - VS Code with GitHub Copilot.
 - GitHub Actions for validation guardrails.
 - Python 3.11+ standard-library tools.
-- Makefile command layer.
+- Windows PowerShell command layer through `scripts/workspace.ps1`.
 - MCP for read-only local context and configured Azure DevOps Work Item access.
 - Knowledge Base sync from a separate Git repository.
 - Azure DevOps Wiki Git workflow for draft documentation publication.
@@ -42,14 +42,14 @@ The system is intentionally local-first. It writes indexes and reports to reposi
 ## Implemented Data Flow
 
 1. Work Item content becomes local artifacts under `.ai/context/work-items/<WORK_ITEM>/`.
-2. `make ai-index-repo` scans local metadata and writes `metadata-components.jsonl`.
-3. Optional `make ai-index-schema ORG=...` reads Salesforce schema with Salesforce CLI.
-4. Optional `make ai-index-config ORG=...` reads only enabled config registry objects and masks output.
-5. `make knowledge-sync` syncs curated notes from the external Knowledge Base repo.
-6. `make knowledge-index` writes `knowledge-cards.jsonl`.
-7. `make ai-context` builds a context pack for Copilot prompts.
+2. `.\scripts\workspace.ps1 ai-index-repo` scans local metadata and writes `metadata-components.jsonl`.
+3. Optional `.\scripts\workspace.ps1 ai-index-schema -Org ...` reads Salesforce schema with Salesforce CLI.
+4. Optional `.\scripts\workspace.ps1 ai-index-config -Org ...` reads only enabled config registry objects and masks output.
+5. `.\scripts\workspace.ps1 knowledge-sync` syncs curated notes from the configured external Knowledge Base repo.
+6. `.\scripts\workspace.ps1 knowledge-index` writes `knowledge-cards.jsonl`.
+7. `.\scripts\workspace.ps1 ai-context` builds a context pack for Copilot prompts.
 8. Prompt files produce solution design, review, documentation, QA, and release readiness drafts.
-9. `make wi-precheck` runs local checks against changed files and Work Item artifacts.
+9. `.\scripts\workspace.ps1 wi-precheck` runs local checks against changed files and Work Item artifacts.
 10. Azure Wiki tools can prepare draft documentation branches after human review.
 
 ## Indexes
@@ -73,9 +73,9 @@ The context pack is designed for repeatable prompt input. It should not contain 
 
 ## Config Impact Design
 
-`make config-impact` reads Work Item context and available config cards to produce `.ai/context/work-items/<WORK_ITEM>/config-impact.yaml` and a Markdown report under `.ai/outputs/config-impact/`.
+`.\scripts\workspace.ps1 config-impact` reads Work Item context and available config cards to produce `.ai/context/work-items/<WORK_ITEM>/config-impact.yaml` and a Markdown report under `.ai/outputs/config-impact/`.
 
-`make config-pack-skeleton` can create a review skeleton under `config/kimbleone-packs/<WORK_ITEM>/`. This is not a config apply tool and does not write Salesforce data.
+`.\scripts\workspace.ps1 config-pack-skeleton` can create a review skeleton under `config/kimbleone-packs/<WORK_ITEM>/`. This is not a config apply tool and does not write Salesforce data.
 
 ## Knowledge Base Architecture
 
@@ -101,7 +101,7 @@ The tool does not auto-merge, does not push to the default branch, and does not 
 `.vscode/mcp.json` currently defines:
 
 - `salesforce-context`: local stdio MCP server backed by `.ai/context` indexes. It is read-only.
-- `ado-remote-mcp`: HTTP MCP endpoint placeholder for Azure DevOps Work Item retrieval at `https://mcp.dev.azure.com/YOUR_ADO_ORG`.
+- `ado-remote-mcp`: HTTP MCP endpoint for Azure DevOps Work Item retrieval. `.\scripts\workspace.ps1 configure` updates the local URL from the configured Azure DevOps organization.
 
 The local MCP server reads only configured context/index paths and exposes context discovery tools. It does not deploy, write Salesforce data, or access arbitrary filesystem roots.
 

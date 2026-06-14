@@ -1,5 +1,7 @@
 ---
+name: fetch-us
 description: Fetch and normalize an Azure DevOps Work Item for the Copilot-only Salesforce AI Workspace.
+agent: work-item-context-curator
 mode: agent
 ---
 

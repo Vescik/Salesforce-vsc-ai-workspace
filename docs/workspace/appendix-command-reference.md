@@ -2,6 +2,17 @@
 
 Commands are defined in `scripts/workspace.ps1`. Commands marked "writes files" create or update local artifacts only unless otherwise noted.
 
+## Runbook 2.0 Usage
+
+This appendix is a command inventory, not the procedure source of truth. Use the operator runbooks for sequence, decision gates, expected outputs, troubleshooting, and escalation:
+
+- [Developer Process Runbook](developer-process-runbook.md)
+- [Knowledge Base Runbook](knowledge-base-runbook.md)
+- [Azure Wiki Publication Runbook](azure-wiki-publication-runbook.md)
+- [Troubleshooting Runbook](troubleshooting.md)
+
+Windows PowerShell is primary on this branch. Mac/Linux `make` examples are maintained in cross-platform references where available.
+
 ## Setup And Config
 
 | Command | Purpose | Requires auth | Writes files | Notes |
@@ -35,8 +46,8 @@ Commands are defined in `scripts/workspace.ps1`. Commands marked "writes files" 
 
 | Command | Purpose | Requires auth | Writes files | Notes |
 | --- | --- | --- | --- | --- |
-| `.\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo <repo>` | Preview KB sync. | Git repo access | Yes | Writes reports only. |
-| `.\scripts\workspace.ps1 knowledge-sync -KbRepo <repo>` | Sync curated KB notes. | Git repo access | Yes | Vendor clone ignored. |
+| `.\scripts\workspace.ps1 knowledge-sync-dry-run` | Preview configured KB sync. | Git repo access | Yes | Writes reports only; use `-KbRepo` only as an override. |
+| `.\scripts\workspace.ps1 knowledge-sync` | Sync curated KB notes. | Git repo access | Yes | Vendor clone ignored; repo comes from local config/env/override. |
 | `.\scripts\workspace.ps1 knowledge-index` | Index KB notes. | No | Yes | Writes `knowledge-cards.jsonl`. |
 | `.\scripts\workspace.ps1 knowledge-create ...` | Convert controlled source to structured draft KB notes. | No | Yes | PDF/CSV/MD/TXT/XML; no raw dumps/secrets. |
 | `.\scripts\workspace.ps1 knowledge-create-dry-run ...` | Preview source conversion without writing notes. | No | No | Writes no notes or reports. |

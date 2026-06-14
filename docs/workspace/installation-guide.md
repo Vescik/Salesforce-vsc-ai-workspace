@@ -80,7 +80,9 @@ Typical local config shape:
   "azure_wiki": {
     "enabled": false,
     "repo_url": "",
-    "branch": "main"
+    "branch": "main",
+    "vendor_dir": ".ai/vendor/azure-wiki",
+    "push_enabled": false
   }
 }
 ```
@@ -114,17 +116,17 @@ Strict doctor can check optional org auth and Knowledge Base readiness:
 If your team uses the separate private Knowledge Base repository:
 
 ```powershell
-.\scripts\workspace.ps1 knowledge-sync -KbRepo "git@github.com:<ORG>/<KB_REPO>.git"
+.\scripts\workspace.ps1 knowledge-sync
 .\scripts\workspace.ps1 knowledge-index
 ```
 
 Use a dry run first when testing access:
 
 ```powershell
-.\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "git@github.com:<ORG>/<KB_REPO>.git"
+.\scripts\workspace.ps1 knowledge-sync-dry-run
 ```
 
-The local vendor clone lives under `.ai/vendor/knowledge-base/` and is ignored. Curated synced notes live under `.ai/knowledge/`.
+The commands use the Knowledge Base repository URL and branch from `.ai/config/workspace.local.json`, `KB_REPO`/`KB_BRANCH`, or explicit command arguments. The local vendor clone lives under `.ai/vendor/knowledge-base/` and is ignored. Curated synced notes live under `.ai/knowledge/`.
 
 ## First Context Build
 

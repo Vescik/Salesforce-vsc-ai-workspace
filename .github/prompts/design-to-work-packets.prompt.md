@@ -1,5 +1,7 @@
 ---
+name: design-to-work-packets
 description: Convert an approved Salesforce/KimbleOne solution design into small implementation-neutral work packets.
+agent: implementation-planner
 mode: ask
 ---
 

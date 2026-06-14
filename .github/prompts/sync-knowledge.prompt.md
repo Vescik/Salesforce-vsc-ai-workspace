@@ -1,9 +1,9 @@
 ---
 name: sync-knowledge
-description: Sync curated internal Knowledge Base notes from the external source repository.
+description: Sync curated internal Knowledge Base notes from the configured external source repository.
 agent: knowledge-curator
 mode: agent
-argument-hint: <KB_REPO_URL_OR_LOCAL_PATH>
+argument-hint: [optional KB_REPO_URL_OR_LOCAL_PATH]
 ---
 
 # Sync Knowledge Base
@@ -15,19 +15,22 @@ Guide a human through syncing curated internal managed package knowledge from th
 ## Instructions
 
 - Use the external Knowledge Base Git repository as the source of truth.
-- Provide the repository URL or local test repository path through `KB_REPO`; do not hardcode it into project files.
+- Prefer the repository URL from `.ai/config/workspace.local.json` or `KB_REPO`; use an explicit argument only as a one-time override.
+- Do not hardcode repository URLs into project files.
 - Start with a dry run:
 
-```bash
-make knowledge-sync-dry-run KB_REPO=<repo-url-or-local-path>
+```powershell
+.\scripts\workspace.ps1 knowledge-sync-dry-run
 ```
 
 - Review `.ai/outputs/knowledge-sync/knowledge-sync.md` for copied files, skipped files, and warnings.
 - If the dry run is acceptable, sync:
 
-```bash
-make knowledge-sync KB_REPO=<repo-url-or-local-path>
+```powershell
+.\scripts\workspace.ps1 knowledge-sync
 ```
+
+- If the repository is not configured locally, use `-KbRepo "<repo-url-or-local-path>"` for this run or run `.\scripts\workspace.ps1 configure`.
 
 - After sync completes, call the `rebuild_knowledge_index` MCP tool to refresh the knowledge card index without requiring a separate terminal command.
 

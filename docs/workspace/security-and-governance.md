@@ -1,5 +1,20 @@
 # Security And Governance
 
+## Purpose
+
+This document defines the governance boundary for all workspace runbooks, prompts, commands, and generated artifacts. It is the safety reference used by the Runbook 2.0 operator docs.
+
+## Runbook 2.0 Alignment
+
+Every operator runbook must preserve these controls:
+
+- State the source of truth for the workflow.
+- Name the human approval gate for risky actions.
+- Use Windows PowerShell commands first on this branch.
+- Document expected local output paths for commands that write files.
+- Prohibit external model APIs, Salesforce writes, Salesforce deployment, and configuration apply actions.
+- Route failures involving secrets, raw data, unsupported package claims, or release authority to human escalation.
+
 ## Core Rules
 
 - GitHub Copilot/Codex-style tooling is the approved AI assistance layer.
@@ -77,9 +92,9 @@ Rules:
 
 Local and CI checks include:
 
-- `make wi-precheck`
-- `make wi-precheck-strict`
-- `make test`
+- `.\scripts\workspace.ps1 wi-precheck`
+- `.\scripts\workspace.ps1 wi-precheck-strict`
+- `.\scripts\workspace.ps1 test`
 - `validate-no-salesforce-ids.yml`
 - `validate-work-item.yml`
 - optional validate-only `salesforce-validate.yml`
@@ -95,6 +110,7 @@ These checks reduce risk but do not replace human review.
 | Config pack skeleton | Yes | Not an apply tool; sidecar decision required. |
 | QA how-to-test | Yes | Test data and expected behavior must be verified. |
 | Release readiness | Yes | Reports are advisory only. |
+| Knowledge Base push | Yes | Prevents unreviewed or unsafe knowledge publication. |
 | Azure Wiki publish | Yes | Prevents unreviewed documentation changes. |
 | DevOps Center promotion | Yes | Official metadata promotion mechanism. |
 

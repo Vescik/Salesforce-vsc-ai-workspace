@@ -41,7 +41,7 @@ pip install -e .
 ```
 
 > `pip install -e .` is run automatically by `setup` — needed only if skipping setup.  
-> `configure` is interactive: sets your Salesforce org alias, Azure DevOps organization, and Knowledge Base URL.
+> `configure` is interactive: sets your Salesforce org alias, Azure DevOps organization, Knowledge Base URL, and Azure Wiki URL.
 
 **3. Authenticate Salesforce:**
 ```powershell
@@ -72,11 +72,11 @@ Open Copilot Chat and type `/fetch-us YOUR-WORK-ITEM-ID` to begin.
 | Index all (schema + config) | `.\scripts\workspace.ps1 ai-index-all -Org IntDev` |
 | Build context pack | `.\scripts\workspace.ps1 ai-context -WorkItem <ID> -Query "<topic>"` |
 | Build context from AC keywords | `.\scripts\workspace.ps1 ai-context-auto -WorkItem <ID>` |
-| Knowledge Base sync | `.\scripts\workspace.ps1 knowledge-sync -KbRepo <url>` |
+| Knowledge Base sync | `.\scripts\workspace.ps1 knowledge-sync` |
 | Knowledge create | `.\scripts\workspace.ps1 knowledge-create -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle "<title>"` |
 | Knowledge Base validation | `.\scripts\workspace.ps1 knowledge-validate` |
 | Knowledge graph | `.\scripts\workspace.ps1 knowledge-graph` |
-| Knowledge Base push | `.\scripts\workspace.ps1 knowledge-push -KbRepo <url>` |
+| Knowledge Base push | `.\scripts\workspace.ps1 knowledge-push` |
 | KB search | `.\scripts\workspace.ps1 knowledge-search -Query "<topic>"` |
 | AC coverage check | `.\scripts\workspace.ps1 ac-coverage -WorkItem <ID>` |
 | Solution design lint | `.\scripts\workspace.ps1 design-lint -WorkItem <ID>` |
@@ -123,8 +123,9 @@ Full prompt reference: [docs/workspace/USER-GUIDE.md — §9](docs/workspace/USE
 | [QUICKSTART.md](QUICKSTART.md) | Five-step quick start |
 | [installation-guide.md](docs/workspace/installation-guide.md) | Detailed installation guide |
 | [developer-process-runbook.md](docs/workspace/developer-process-runbook.md) | End-to-end developer workflow |
-| [knowledge-base-runbook.md](docs/workspace/knowledge-base-runbook.md) | Knowledge Base management guide |
-| [azure-wiki-publication-runbook.md](docs/workspace/azure-wiki-publication-runbook.md) | Azure Wiki publication workflow |
+| [knowledge-base-runbook.md](docs/workspace/knowledge-base-runbook.md) | Runbook 2.0 Knowledge Base operator procedure |
+| [azure-wiki-publication-runbook.md](docs/workspace/azure-wiki-publication-runbook.md) | Runbook 2.0 Azure Wiki publication workflow |
+| [runbook-2.0-quality-checklist.md](docs/workspace/runbook-2.0-quality-checklist.md) | Shared professional runbook standard |
 | [workspace-architecture-technical.md](docs/workspace/workspace-architecture-technical.md) | Technical architecture reference |
 | [appendix-command-reference.md](docs/workspace/appendix-command-reference.md) | Complete command reference |
 | [security-and-governance.md](docs/workspace/security-and-governance.md) | Security model and governance |

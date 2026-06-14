@@ -101,7 +101,8 @@ class DoctorTests(unittest.TestCase):
         ):
             (repo_root / relative).mkdir(parents=True, exist_ok=True)
         (repo_root / "AGENTS.md").write_text("# Rules\n", encoding="utf-8")
-        (repo_root / "Makefile").write_text("help:\n\t@echo help\n", encoding="utf-8")
+        (repo_root / "scripts").mkdir(parents=True, exist_ok=True)
+        (repo_root / "scripts" / "workspace.ps1").write_text("param([string]$Target)\n", encoding="utf-8")
         (repo_root / ".vscode" / "tasks.json").write_text("{}", encoding="utf-8")
         (repo_root / ".github" / "copilot-instructions.md").write_text("# Instructions\n", encoding="utf-8")
 

@@ -99,8 +99,8 @@
           <h2>Knowledge Base Flow</h2>
           <ol class="compact">
             <li>Curated notes live in a separate private Git repository.</li>
-            <li>`make knowledge-sync` copies reviewed notes into `.ai/knowledge/`.</li>
-            <li>`make knowledge-index` writes `knowledge-cards.jsonl`.</li>
+            <li>`.\scripts\workspace.ps1 knowledge-sync` copies reviewed notes into `.ai/knowledge/`.</li>
+            <li>`.\scripts\workspace.ps1 knowledge-index` writes `knowledge-cards.jsonl`.</li>
             <li>Context packs include selected cards as supporting evidence.</li>
           </ol>
         </div>
@@ -170,12 +170,12 @@
 
       <section id="quickstart" class="section">
         <h2>Quick Start Commands</h2>
-        <pre><code>make setup
-make configure
-make doctor
-make ai-index-repo
-make knowledge-index
-make ai-context WORK_ITEM=KIM-1234 QUERY="invoice approval"</code></pre>
+        <pre><code>.\scripts\workspace.ps1 setup
+.\scripts\workspace.ps1 configure
+.\scripts\workspace.ps1 doctor
+.\scripts\workspace.ps1 ai-index-repo
+.\scripts\workspace.ps1 knowledge-index
+.\scripts\workspace.ps1 ai-context -WorkItem KIM-1234 -Query "invoice approval"</code></pre>
       </section>
     </main>
   </body>
