@@ -116,6 +116,7 @@ def validate_file(
     findings.extend(_schema_findings(metadata, schema, rel_path))
     findings.extend(_staleness_findings(metadata, rel_path, max_age_days))
     findings.extend(_cross_ref_findings(metadata, rel_path, sobject_index, process_slugs))
+    findings.extend(_v2_quality_findings(metadata, body, rel_path))
     if not _is_governance_doc(path, knowledge_root, metadata):
         findings.extend(_governance_findings(body, rel_path))
     return findings
@@ -242,6 +243,84 @@ def _cross_ref_findings(
                     "message": f"related_processes entry {process!r} has no matching file in process-maps/.",
                 })
     return findings
+
+
+def _v2_quality_findings(metadata: dict[str, Any], body: str, rel_path: str) -> list[dict[str, Any]]:
+    if not _looks_v2(metadata):
+        return []
+    findings: list[dict[str, Any]] = []
+    required_text = {
+        "purpose": "Generated v2 knowledge notes should explain why the note exists.",
+        "source_file": "Generated v2 knowledge notes should preserve the source file reference.",
+        "source_format": "Generated v2 knowledge notes should preserve the detected source format.",
+        "source_checksum": "Generated v2 knowledge notes should preserve the source checksum.",
+    }
+    for field, message in required_text.items():
+        if not str(metadata.get(field) or "").strip():
+            findings.append({"severity": "low", "type": "knowledge_quality", "path": rel_path, "field": field, "message": message})
+    required_lists = {
+        "usage_context": "Generated v2 knowledge notes should include at least one usage context.",
+        "keywords": "Generated v2 knowledge notes should include search keywords.",
+        "key_concepts": "Generated v2 knowledge notes should include key concepts when detectable.",
+    }
+    for field, message in required_lists.items():
+        if not _list_value(metadata.get(field)):
+            findings.append({"severity": "low", "type": "knowledge_quality", "path": rel_path, "field": field, "message": message})
+    semantic_present = any(
+        _list_value(metadata.get(field))
+        for field in (
+            "related_objects",
+            "related_fields",
+            "related_metadata",
+            "related_processes",
+            "business_rules",
+            "integration_points",
+            "dependencies",
+        )
+    )
+    if not semantic_present:
+        findings.append({
+            "severity": "low",
+            "type": "knowledge_quality",
+            "path": rel_path,
+            "message": "Generated v2 knowledge notes should include at least one semantic reference when detectable.",
+        })
+    for heading in ("# Summary", "# Source", "# Search Terms", "# Review Notes"):
+        if heading not in body:
+            findings.append({
+                "severity": "low",
+                "type": "knowledge_quality",
+                "path": rel_path,
+                "message": f"Generated v2 knowledge note is missing body heading: {heading}",
+            })
+    return findings
+
+
+def _looks_v2(metadata: dict[str, Any]) -> bool:
+    return any(
+        key in metadata
+        for key in (
+            "purpose",
+            "source_checksum",
+            "source_format",
+            "usage_context",
+            "aliases",
+            "key_concepts",
+            "related_fields",
+            "related_metadata",
+            "integration_points",
+            "dependencies",
+            "business_rules",
+        )
+    )
+
+
+def _list_value(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item).strip()]
+    if value:
+        return [str(value)]
+    return []
 
 
 def _governance_findings(body: str, rel_path: str) -> list[dict[str, Any]]:

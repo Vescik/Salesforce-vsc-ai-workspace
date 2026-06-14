@@ -15,6 +15,7 @@
 - **Generate solution designs, QA docs, and technical documentation** using specialized Copilot agents
 - **Review and validate** — implementation code, config impact, and release readiness before DevOps Center promotion
 - **Maintain internal knowledge** — sync, curate, index, search, and push a private KB about the managed package
+- **Create searchable knowledge** — convert PDF, CSV, Markdown, TXT, and Salesforce XML/metadata files into draft AI-ready KB notes
 - **Publish Azure Wiki drafts** — draft-first, human-approved documentation pipeline
 
 ## What It Does NOT Do
@@ -72,6 +73,7 @@ Open Copilot Chat and type `/fetch-us YOUR-WORK-ITEM-ID` to begin.
 | Build context pack | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` |
 | Build context from AC keywords | `make ai-context-auto WORK_ITEM=<ID>` |
 | Knowledge Base sync | `make knowledge-sync KB_REPO=<url>` |
+| Knowledge create | `make knowledge-create KNOWLEDGE_SOURCE=<file> KNOWLEDGE_DOMAIN=<domain> KNOWLEDGE_TITLE="<title>"` |
 | Knowledge Base validation | `make knowledge-validate` |
 | Knowledge graph | `make knowledge-graph` |
 | Knowledge Base push | `make knowledge-push KB_REPO=<url>` |

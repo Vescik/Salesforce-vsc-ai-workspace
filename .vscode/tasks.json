@@ -200,9 +200,33 @@
       "problemMatcher": []
     },
     {
+      "label": "AI: Create Knowledge File",
+      "type": "shell",
+      "command": "make knowledge-create KNOWLEDGE_SOURCE=\"${input:knowledgeSource}\" KNOWLEDGE_DOMAIN=\"${input:knowledgeDomain}\" KNOWLEDGE_TITLE=\"${input:knowledgeTitle}\" KNOWLEDGE_OWNER=\"${input:knowledgeOwner}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Create Knowledge File Dry Run",
+      "type": "shell",
+      "command": "make knowledge-create-dry-run KNOWLEDGE_SOURCE=\"${input:knowledgeSource}\" KNOWLEDGE_DOMAIN=\"${input:knowledgeDomain}\" KNOWLEDGE_TITLE=\"${input:knowledgeTitle}\" KNOWLEDGE_OWNER=\"${input:knowledgeOwner}\"",
+      "problemMatcher": []
+    },
+    {
       "label": "AI: Import Knowledge Manifest",
       "type": "shell",
       "command": "make knowledge-import-manifest KNOWLEDGE_MANIFEST=\"${input:knowledgeManifest}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Create Knowledge Manifest",
+      "type": "shell",
+      "command": "make knowledge-create-manifest KNOWLEDGE_MANIFEST=\"${input:knowledgeManifest}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Index Knowledge Base",
+      "type": "shell",
+      "command": "make knowledge-index",
       "problemMatcher": []
     },
     {
@@ -212,27 +236,21 @@
       "problemMatcher": []
     },
     {
-      "label": "AI: Index Metadata Knowledge",
+      "label": "AI: Build Knowledge Index YAML",
       "type": "shell",
-      "command": "make metadata-knowledge-index",
+      "command": "make knowledge-index-yaml",
       "problemMatcher": []
     },
     {
-      "label": "AI: Emit Knowledge YAML Index",
+      "label": "AI: Build Metadata Knowledge Index",
       "type": "shell",
-      "command": "make knowledge-index-yaml",
+      "command": "make metadata-knowledge-index",
       "problemMatcher": []
     },
     {
       "label": "AI: Build Knowledge Graph",
       "type": "shell",
       "command": "make knowledge-graph",
-      "problemMatcher": []
-    },
-    {
-      "label": "AI: Index Knowledge Base",
-      "type": "shell",
-      "command": "make knowledge-index",
       "problemMatcher": []
     },
     {
