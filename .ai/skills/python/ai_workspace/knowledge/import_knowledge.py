@@ -10,7 +10,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from ai_workspace.knowledge.parse_documents import chunk_text, extract_text, normalize_whitespace
+from ai_workspace.knowledge.converters import dispatch as convert_document
+from ai_workspace.knowledge.parse_documents import chunk_text, normalize_whitespace
+from ai_workspace.security.no_salesforce_ids import find_salesforce_id_candidates_in_text
 
 
 DEFAULT_OWNER = "Salesforce Platform Team"
@@ -96,10 +98,13 @@ def import_source(
     """Import one source file into one or more markdown notes."""
 
     source = source.resolve()
-    result = extract_text(source, max_chars=max_chars)
-    text = str(result.get("text") or "")
+    result = convert_document(source)
+    text = _text_from_doc(result, max_chars=max_chars)
     sensitive_warnings = detect_sensitive_content(text)
     redacted_text = redact_sensitive_content(text)
+    redaction_diff = _diff_redaction_counts(text, redacted_text)
+    prohibited_classes = sorted({finding.get("candidate", "") for finding in find_salesforce_id_candidates_in_text(text) if finding.get("candidate")})
+    converter_metrics = _converter_metrics(result, prohibited_classes, redaction_diff)
     chunks = chunk_text(redacted_text, max_chars=chunk_size, overlap=500) or [""]
     target_dir = _resolve_out_dir(out_dir, domain, repo_root)
     source_rel = _repo_relative(source, repo_root)
@@ -142,12 +147,71 @@ def import_source(
                 "parse_status": result.get("parse_status"),
                 "warnings": list(result.get("warnings") or []) + sensitive_warnings,
                 "dry_run": dry_run,
+                **converter_metrics,
             }
         )
 
     if records:
         records[0]["outputs"] = outputs
     return records[:1]
+
+
+def _text_from_doc(result: dict[str, Any], max_chars: int) -> str:
+    """Concatenate sections + tables + code blocks from a NormalizedDocument into a single text blob.
+
+    Falls back to whatever ``parse_documents.extract_text`` produced (already wrapped
+    into a single section by ``converters.dispatch``) when no structured data is
+    available. Truncates at ``max_chars`` with a marker so downstream chunking has
+    a deterministic upper bound.
+    """
+
+    parts: list[str] = []
+    for section in result.get("sections") or []:
+        heading = str(section.get("heading") or "").strip()
+        body = str(section.get("body") or "").strip()
+        level = int(section.get("level") or 1)
+        if heading:
+            parts.append(("#" * max(1, min(6, level))) + " " + heading)
+        if body:
+            parts.append(body)
+    for table in result.get("tables") or []:
+        caption = str(table.get("caption") or "").strip()
+        if caption:
+            parts.append(f"Table: {caption}")
+        for row in table.get("rows") or []:
+            parts.append(" | ".join(str(cell) for cell in row))
+    for code in result.get("code_blocks") or []:
+        lang = str(code.get("lang") or "").strip()
+        text = str(code.get("text") or "")
+        if text:
+            parts.append(f"```{lang}\n{text}\n```")
+    blob = "\n\n".join(part for part in parts if part)
+    if len(blob) > max_chars:
+        blob = blob[:max_chars] + "\n\n[TRUNCATED]"
+    return blob
+
+
+def _converter_metrics(result: dict[str, Any], prohibited_classes: list[str], redaction_diff: dict[str, int]) -> dict[str, Any]:
+    metadata = result.get("metadata") or {}
+    return {
+        "converter": str(result.get("format") or "unknown"),
+        "degraded": bool(result.get("degraded")),
+        "sections_count": len(result.get("sections") or []),
+        "tables_count": len(result.get("tables") or []),
+        "code_blocks_count": len(result.get("code_blocks") or []),
+        "speaker_notes_present": bool(metadata.get("speaker_notes_present")),
+        "prohibited_classes_detected": prohibited_classes,
+        "redaction_counts": redaction_diff,
+    }
+
+
+def _diff_redaction_counts(original: str, redacted: str) -> dict[str, int]:
+    return {
+        "emails": original.count("@") - redacted.count("@") if "[REDACTED_EMAIL]" in redacted else 0,
+        "redacted_email_markers": redacted.count("[REDACTED_EMAIL]"),
+        "redacted_token_markers": redacted.count("[REDACTED_TOKEN]") + redacted.count("[REDACTED]"),
+        "redacted_private_keys": redacted.count("[REDACTED_PRIVATE_KEY]"),
+    }
 
 
 def detect_sensitive_content(text: str) -> list[str]:

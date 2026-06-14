@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Vescik/Salesforce-knowledge-base/schemas/knowledge-note.schema.json",
+  "title": "Knowledge Note Front-Matter",
+  "description": "Schema for the YAML front matter block of a knowledge note in .ai/knowledge.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "domain",
+    "source_type",
+    "owner",
+    "status",
+    "confidence",
+    "last_reviewed"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "internal_knowledge",
+        "decision",
+        "governance",
+        "process",
+        "object_note"
+      ]
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "reviewed", "accepted", "deprecated"]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "last_reviewed": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "applies_to": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "related_objects": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "related_config_objects": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "related_processes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

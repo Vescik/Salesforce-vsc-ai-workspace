@@ -26,6 +26,14 @@ KNOWLEDGE_PUSH_MESSAGE ?=
 KNOWLEDGE_INDEX ?= .ai/context/index/knowledge-cards.jsonl
 KNOWLEDGE_SOURCE ?=
 KNOWLEDGE_MANIFEST ?= .ai/templates/knowledge-import-manifest.yaml
+KNOWLEDGE_SCHEMA ?= .ai/templates/schemas/knowledge-note.schema.json
+KNOWLEDGE_VALIDATION_JSON ?= .ai/outputs/knowledge-import/validation-report.json
+KNOWLEDGE_VALIDATION_MD ?= .ai/outputs/knowledge-import/validation-report.md
+KNOWLEDGE_MAX_AGE_DAYS ?= 180
+KNOWLEDGE_VALIDATE_FLAGS ?=
+FORCE_APP_ROOT ?= force-app
+METADATA_KNOWLEDGE_INDEX ?= .ai/context/index/metadata-knowledge-cards.jsonl
+METADATA_KNOWLEDGE_SUMMARY ?= .ai/context/index/metadata-knowledge-summary.json
 KNOWLEDGE_DOMAIN ?= general
 KNOWLEDGE_TITLE ?=
 KNOWLEDGE_OWNER ?= Salesforce Platform Team
@@ -41,7 +49,7 @@ WIKI_APPROVAL_NOTE ?=
 DOCS_ROOT ?= docs/workspace
 DOCS_HTML ?= $(DOCS_ROOT)/html/index.html
 
-.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
+.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-validate metadata-knowledge-index knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
 
 help:
 	@echo "Copilot-only Salesforce AI Workspace commands"
@@ -70,6 +78,8 @@ help:
 	@echo "  make knowledge-import-manifest KNOWLEDGE_MANIFEST=.ai/templates/knowledge-import-manifest.yaml"
 	@echo "  make knowledge-index"
 	@echo "  make knowledge-search QUERY=\"invoice approval\""
+	@echo "  make knowledge-validate"
+	@echo "  make metadata-knowledge-index"
 	@echo "  make knowledge-push-dry-run KB_REPO=<git-url>"
 	@echo "  make knowledge-push KB_REPO=<git-url>"
 	@echo "  make wiki-dry-run WORK_ITEM=KIM-1234 WIKI_TITLE=\"Invoice Approval Routing\" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<repo>"
@@ -252,6 +262,21 @@ knowledge-search:
 		--query "$(QUERY)" \
 		--index "$(KNOWLEDGE_INDEX)" \
 		--top-k 10
+
+knowledge-validate:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.validate_knowledge \
+		--knowledge-root "$(KNOWLEDGE_ROOT)" \
+		--schema "$(KNOWLEDGE_SCHEMA)" \
+		--max-age-days $(KNOWLEDGE_MAX_AGE_DAYS) \
+		--json-out "$(KNOWLEDGE_VALIDATION_JSON)" \
+		--md-out "$(KNOWLEDGE_VALIDATION_MD)" \
+		$(KNOWLEDGE_VALIDATE_FLAGS)
+
+metadata-knowledge-index:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.metadata_to_knowledge \
+		--force-app-root "$(FORCE_APP_ROOT)" \
+		--out "$(METADATA_KNOWLEDGE_INDEX)" \
+		--summary-out "$(METADATA_KNOWLEDGE_SUMMARY)"
 
 knowledge-push-dry-run:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.push_knowledge \
