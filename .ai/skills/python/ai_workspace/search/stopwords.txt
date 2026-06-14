@@ -1,0 +1,87 @@
+# Stop-words for AC keyword extraction.
+#
+# Filtered before IDF ranking so common English and acceptance-criteria
+# boilerplate doesn't dominate the top-N keyword list. Lower-case, one token
+# per line, # comments allowed.
+#
+# Kept short on purpose — IDF already deprioritizes universally-frequent
+# terms. Removing too much hurts recall on short AC bullets.
+
+# English function words
+a
+an
+and
+are
+as
+at
+be
+been
+being
+but
+by
+do
+does
+done
+for
+from
+had
+has
+have
+in
+into
+is
+it
+its
+not
+of
+on
+or
+should
+shall
+so
+such
+than
+that
+the
+their
+them
+then
+these
+this
+those
+to
+was
+we
+were
+when
+where
+which
+while
+who
+will
+with
+would
+
+# AC / Gherkin boilerplate
+given
+when
+then
+and
+but
+must
+shall
+should
+ac
+
+# Common Salesforce filler that doesn't disambiguate
+salesforce
+record
+records
+field
+fields
+object
+objects
+user
+users
+page
+view

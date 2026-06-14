@@ -52,10 +52,20 @@ Return a concise summary with:
 - Acceptance criteria count.
 - Missing fields or open questions.
 - Files written.
-- Recommended next command:
+- Recommended next command (auto-seeds the search query from the acceptance criteria):
+
+```bash
+make ai-context-auto WORK_ITEM=<WORK_ITEM_ID>
+```
+
+If you want to override the auto-extracted keywords, fall back to:
 
 ```bash
 make ai-context WORK_ITEM=<WORK_ITEM_ID> QUERY="<business topic>"
 ```
+
+`ai-context-auto` runs `extract_ac_keywords` over the AC + ADO description, expands
+synonyms from `.ai/config/search-synonyms.yaml`, and ranks by IDF before
+piping the result into `make ai-context`.
 
 Every downstream recommendation must map to extracted acceptance criteria.

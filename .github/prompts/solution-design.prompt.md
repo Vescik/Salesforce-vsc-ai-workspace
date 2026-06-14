@@ -45,6 +45,33 @@ Produce a design with these sections:
 13. QA test strategy.
 14. Open questions.
 15. Assumptions.
+16. Knowledge References.
+17. Coverage Table.
+
+### Knowledge References (section 16)
+
+A bullet list, one per cited knowledge note pulled from `relevant-knowledge.yaml`:
+
+- `[<slug>](<.ai/knowledge/...>)` — status, confidence, why cited.
+
+Only cite entries present in `.ai/context/work-items/<WORK_ITEM_ID>/relevant-knowledge.yaml`.
+Any citation of a `status: draft` or `confidence: low` knowledge note must be
+wrapped in `[unverified]` in the design body (for example:
+`[unverified] As noted in [billing-schedule-rules](.ai/knowledge/domains/billing/billing-schedule-rules.md), …`).
+`design_lint` will flag unwrapped draft/low-confidence citations as high-severity.
+
+### Coverage Table (section 17)
+
+A markdown table with one row per acceptance criterion:
+
+| AC | Cited Knowledge | Cited Metadata | Notes |
+| --- | --- | --- | --- |
+| AC-1 | `[invoice-approval-process](.ai/knowledge/domains/billing/invoice-approval-process.md)` | `kmbi__Invoice__c`, `Invoice_Approval` | … |
+| AC-2 | … | … | … |
+
+Every AC ID from the work item must appear here. `ac_coverage_check` classifies
+each row as `covered | partial | missing` and `precheck_work_item` promotes any
+`missing` row to a blocking finding.
 
 ## Architecture Options To Consider
 

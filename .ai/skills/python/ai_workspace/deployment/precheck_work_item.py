@@ -48,6 +48,7 @@ def main(argv: list[str] | None = None) -> int:
         "salesforce_ids": [],
         "raw_data": [],
         "required_artifacts": [],
+        "design_coverage": [],
     }
 
     changed_files: list[str] = []
@@ -88,6 +89,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     findings_by_check["required_artifacts"].extend(
         _required_artifact_findings(args.work_item, work_item_dir, Path(repo_root))
+    )
+    findings_by_check["design_coverage"].extend(
+        _design_coverage_findings(args.work_item, work_item_dir, Path(repo_root))
     )
 
     checks = {
@@ -144,6 +148,111 @@ def _fallback_changed_files(repo_root: str) -> list[str]:
         except RuntimeError:
             continue
     return sorted(changed)
+
+
+def _design_coverage_findings(work_item: str, work_item_dir: Path, repo_root: Path) -> list[dict[str, Any]]:
+    """Run ac_coverage_check + design_lint and promote their failures to precheck findings.
+
+    Missing ACs and blocking design-lint findings become blocking precheck findings so
+    promote-to-approved gates refuse incomplete designs.
+    """
+
+    proposed = repo_root / "specs" / "proposed" / f"{work_item}.solution-design.md"
+    approved = repo_root / "specs" / "approved" / f"{work_item}.solution-design.md"
+    if not proposed.exists() and not approved.exists():
+        return []
+
+    findings: list[dict[str, Any]] = []
+    try:
+        from ai_workspace.deployment.ac_coverage_check import main as ac_main
+    except Exception as exc:  # noqa: BLE001
+        findings.append({
+            "severity": "high",
+            "type": "design_coverage_import_error",
+            "path": "",
+            "message": f"Could not import ac_coverage_check: {exc}",
+        })
+        return findings
+
+    try:
+        ac_main([
+            "--work-item", work_item,
+            "--work-item-dir", work_item_dir.as_posix(),
+            "--repo-root", repo_root.as_posix(),
+        ])
+    except SystemExit:
+        # ac_main returns 1 when ACs are missing; we still want to read the traceability output below.
+        pass
+
+    traceability_path = work_item_dir / "traceability.json"
+    if traceability_path.exists():
+        try:
+            traceability = json.loads(traceability_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            findings.append({
+                "severity": "high",
+                "type": "traceability_parse_error",
+                "path": traceability_path.as_posix(),
+                "message": f"Could not parse traceability.json: {exc}",
+            })
+        else:
+            for row in traceability.get("rows") or []:
+                if str(row.get("verdict") or "").lower() == "missing":
+                    findings.append({
+                        "severity": "blocking",
+                        "type": "ac_not_covered",
+                        "path": traceability_path.as_posix(),
+                        "ac_id": row.get("ac_id"),
+                        "message": f"{row.get('ac_id')} is not covered by the design: {row.get('rationale')}",
+                    })
+
+    try:
+        from ai_workspace.deployment.design_lint import main as lint_main
+    except Exception as exc:  # noqa: BLE001
+        findings.append({
+            "severity": "high",
+            "type": "design_lint_import_error",
+            "path": "",
+            "message": f"Could not import design_lint: {exc}",
+        })
+        return findings
+
+    lint_md = Path(f".ai/outputs/precheck/{work_item}.design-lint.md")
+    lint_json = Path(f".ai/outputs/precheck/{work_item}.design-lint.json")
+    try:
+        lint_main([
+            "--work-item", work_item,
+            "--work-item-dir", work_item_dir.as_posix(),
+            "--repo-root", repo_root.as_posix(),
+            "--out", lint_md.as_posix(),
+            "--out-json", lint_json.as_posix(),
+        ])
+    except SystemExit:
+        pass
+
+    if lint_json.exists():
+        try:
+            payload = json.loads(lint_json.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            findings.append({
+                "severity": "high",
+                "type": "design_lint_parse_error",
+                "path": lint_json.as_posix(),
+                "message": f"Could not parse design-lint output: {exc}",
+            })
+        else:
+            for raw in payload.get("findings") or []:
+                severity = str(raw.get("severity") or "low")
+                # Forward blocking/high lint findings as-is; downgrade medium/low to medium/low precheck findings.
+                if severity not in {"blocking", "high", "medium", "low"}:
+                    severity = "low"
+                findings.append({
+                    "severity": severity,
+                    "type": f"design_lint.{raw.get('type') or 'finding'}",
+                    "path": raw.get("path") or "",
+                    "message": raw.get("message") or "",
+                })
+    return findings
 
 
 def _required_artifact_findings(work_item: str, work_item_dir: Path, repo_root: Path) -> list[dict[str, str]]:

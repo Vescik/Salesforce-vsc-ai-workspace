@@ -51,6 +51,15 @@ Every solution design must include:
 - Open questions.
 - Deployment notes.
 - QA strategy.
+- **Knowledge References** — bullet list of cited notes (`[slug](path) — status, confidence, why cited`). Only cite entries present in `relevant-knowledge.yaml`.
+- **Coverage Table** — `| AC | Cited Knowledge | Cited Metadata | Notes |` row per acceptance criterion.
+
+### Knowledge citation rules
+
+- Wrap any citation of a `status: draft` or `confidence: low` knowledge note in `[unverified]` in the design body.
+- Every `related_object` of a cited knowledge card must be mentioned in the design body; `design_lint` flags missing mentions.
+- Every metadata component name in the Impacted Metadata section must resolve to a row in `metadata-components.jsonl` (regenerate with `make ai-index-repo`).
+- Missing AC coverage promotes to a blocking precheck finding (`precheck_work_item.design_coverage`).
 
 ## UI And Field Guidance
 

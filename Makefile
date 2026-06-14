@@ -52,7 +52,7 @@ WIKI_APPROVAL_NOTE ?=
 DOCS_ROOT ?= docs/workspace
 DOCS_HTML ?= $(DOCS_ROOT)/html/index.html
 
-.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-validate metadata-knowledge-index knowledge-graph knowledge-index-yaml knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
+.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-validate metadata-knowledge-index knowledge-graph knowledge-index-yaml ai-context-auto ac-coverage design-lint knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
 
 help:
 	@echo "Copilot-only Salesforce AI Workspace commands"
@@ -72,7 +72,10 @@ help:
 	@echo "  make ai-index-config ORG=IntDev"
 	@echo "  make ai-index-all ORG=IntDev"
 	@echo "  make ai-context WORK_ITEM=KIM-1234 QUERY=\"invoice approval\""
+	@echo "  make ai-context-auto WORK_ITEM=KIM-1234"
 	@echo "  make ai-context-example"
+	@echo "  make ac-coverage WORK_ITEM=KIM-1234"
+	@echo "  make design-lint WORK_ITEM=KIM-1234"
 	@echo "  make config-impact WORK_ITEM=KIM-1234"
 	@echo "  make config-pack-skeleton WORK_ITEM=KIM-1234"
 	@echo "  make knowledge-sync-dry-run KB_REPO=<git-url-or-local-path>"
@@ -191,6 +194,22 @@ ai-context:
 
 ai-context-example:
 	$(MAKE) ai-context WORK_ITEM=EXAMPLE-WI QUERY="field ui visibility flow config"
+
+ai-context-auto:
+	@AC_QUERY="$$(PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.extract_ac_keywords --work-item $(WORK_ITEM) --top 12 --print)"; \
+	echo "Auto-extracted AC keywords: $$AC_QUERY"; \
+	$(MAKE) ai-context WORK_ITEM=$(WORK_ITEM) QUERY="$$AC_QUERY"
+
+ac-coverage:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.deployment.ac_coverage_check \
+		--work-item $(WORK_ITEM) \
+		--work-item-dir $(WORK_ITEM_DIR) \
+		--print-summary
+
+design-lint:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.deployment.design_lint \
+		--work-item $(WORK_ITEM) \
+		--work-item-dir $(WORK_ITEM_DIR)
 
 ai-clean-context:
 	rm -f .ai/context/index/*.jsonl
