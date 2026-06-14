@@ -1,5 +1,7 @@
 ---
+name: build-context
 description: Build an implementation-neutral context pack for a Salesforce/KimbleOne Work Item.
+agent: work-item-context-curator
 mode: ask
 ---
 

@@ -1,5 +1,7 @@
 ---
+name: solution-design
 description: Generate an implementation-neutral Salesforce/KimbleOne solution design from Work Item context.
+agent: solution-architect
 mode: ask
 ---
 

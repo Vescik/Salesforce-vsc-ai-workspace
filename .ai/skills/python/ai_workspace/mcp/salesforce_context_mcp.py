@@ -85,7 +85,12 @@ class SalesforceContextServer:
             return self.knowledge_search(
                 str(arguments.get("query", "")),
                 str(arguments.get("domain") or "") or None,
-                str(arguments.get("related_object") or "") or None,
+                str(arguments.get("usage_context") or "") or None,
+                str(arguments.get("object") or arguments.get("related_object") or "") or None,
+                str(arguments.get("field") or "") or None,
+                str(arguments.get("metadata_type") or "") or None,
+                str(arguments.get("status") or "") or None,
+                str(arguments.get("confidence") or "") or None,
                 _int_arg(arguments, "k", 10),
             )
         if name == "knowledge_graph_neighbors":
@@ -274,7 +279,12 @@ class SalesforceContextServer:
         self,
         query: str,
         domain: str | None,
+        usage_context: str | None,
         related_object: str | None,
+        related_field: str | None,
+        metadata_type: str | None,
+        status: str | None,
+        confidence: str | None,
         k: int,
     ) -> dict[str, Any]:
         """BM25-ranked search over the knowledge index with optional filters."""
@@ -285,18 +295,36 @@ class SalesforceContextServer:
             raise ValueError("domain must contain only letters, digits, hyphens, and underscores")
         if related_object is not None and not OBJECT_API_RE.fullmatch(related_object):
             raise ValueError("related_object must be a Salesforce API name")
+        if related_field is not None and not re.fullmatch(r"[A-Za-z0-9_.]+", related_field):
+            raise ValueError("field must be a Salesforce field API name or object.field reference")
         path = self._index_file(INDEX_FILES["knowledge"])
         if not path.exists():
             return {"query": query, "results": [], "warnings": [f"Missing knowledge index: {path.as_posix()}"]}
         # Over-fetch then filter; BM25 over the full corpus + post-filter keeps relevance accurate.
-        raw = search_jsonl(str(path), query, max(k * 4, k), mode="bm25")
+        raw = search_jsonl(str(path), query, max(k * 6, k), mode="bm25")
         filtered: list[dict[str, Any]] = []
         for record in raw:
             if domain and str(record.get("domain") or "").lower() != domain.lower():
                 continue
+            if status and str(record.get("status") or "").lower() != status.lower():
+                continue
+            if confidence and str(record.get("confidence") or "").lower() != confidence.lower():
+                continue
+            if usage_context:
+                contexts = [str(item).lower() for item in record.get("usage_context") or []]
+                if usage_context.lower() not in contexts:
+                    continue
             if related_object:
                 related = [str(item) for item in (record.get("related_objects") or [])]
                 if related_object not in related:
+                    continue
+            if related_field:
+                fields = [str(item) for item in record.get("related_fields") or []]
+                if related_field not in fields and not any(value.endswith(f".{related_field}") for value in fields):
+                    continue
+            if metadata_type:
+                metadata_text = " ".join(str(item) for item in record.get("related_metadata") or []).lower()
+                if metadata_type.lower() not in metadata_text:
                     continue
             filtered.append(_concise_record("knowledge", record))
             if len(filtered) >= k:
@@ -304,7 +332,12 @@ class SalesforceContextServer:
         return {
             "query": query,
             "domain": domain,
+            "usage_context": usage_context,
             "related_object": related_object,
+            "related_field": related_field,
+            "metadata_type": metadata_type,
+            "status": status,
+            "confidence": confidence,
             "results": filtered,
             "warnings": [] if filtered else ["No matching knowledge records under the given filters."],
         }
@@ -527,7 +560,22 @@ def _tool_definitions() -> list[dict[str, Any]]:
         _tool("list_knowledge_domain", "List all knowledge cards indexed under a specific domain (e.g. 'billing', 'time-expense').", {"domain": "string", "limit": "integer"}, ["domain"]),
         _tool("rebuild_knowledge_index", "Rebuild the local knowledge card index from .ai/knowledge/ notes. Call this after importing or editing knowledge notes.", {}, []),
         _tool("build_context_pack", "Build a Work Item context pack by searching all local indexes. Writes context-pack.md and relevant-*.yaml under .ai/context/work-items/<id>/.", {"work_item_id": "string", "query": "string"}, ["work_item_id", "query"]),
-        _tool("knowledge_search", "BM25 search over local knowledge cards with optional domain and related_object filters.", {"query": "string", "domain": "string", "related_object": "string", "k": "integer"}, ["query"]),
+        _tool(
+            "knowledge_search",
+            "BM25 search over local knowledge cards with optional semantic filters.",
+            {
+                "query": "string",
+                "domain": "string",
+                "usage_context": "string",
+                "object": "string",
+                "field": "string",
+                "metadata_type": "string",
+                "status": "string",
+                "confidence": "string",
+                "k": "integer",
+            },
+            ["query"],
+        ),
         _tool("knowledge_graph_neighbors", "BFS through the local knowledge graph (depth 1-3) from a node id like 'note:invoice-approval-process' or 'object:kmbi__Invoice__c'.", {"node_id": "string", "depth": "integer"}, ["node_id"]),
         _tool("knowledge_get", "Resolve a knowledge note by slug via the local index and return its content.", {"slug": "string"}, ["slug"]),
     ]
@@ -626,7 +674,18 @@ def _concise_record(source_type: str, record: dict[str, Any]) -> dict[str, Any]:
                 "confidence": record.get("confidence"),
                 "status": record.get("status"),
                 "last_reviewed": record.get("last_reviewed"),
+                "purpose": record.get("purpose"),
                 "summary": record.get("summary"),
+                "usage_context": record.get("usage_context"),
+                "key_concepts": record.get("key_concepts"),
+                "keywords": record.get("keywords"),
+                "aliases": record.get("aliases"),
+                "related_objects": record.get("related_objects"),
+                "related_fields": record.get("related_fields"),
+                "related_metadata": record.get("related_metadata"),
+                "integration_points": record.get("integration_points"),
+                "dependencies": record.get("dependencies"),
+                "business_rules": record.get("business_rules"),
                 "risk_flags": record.get("risk_flags"),
             },
             score,

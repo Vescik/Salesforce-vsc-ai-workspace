@@ -24,7 +24,7 @@ Help select relevant internal KB notes for a Work Item without loading the entir
 
 - If no context pack exists for the Work Item yet, call the `build_context_pack` MCP tool with the Work Item ID and query. This builds the context pack and `relevant-knowledge.yaml` without requiring a terminal command.
 - After knowledge import or edit, call `rebuild_knowledge_index` MCP tool to refresh the index before searching.
-- Prefer the `salesforce-context` MCP tool `get_related_knowledge` for search, or `make knowledge-search QUERY="<QUERY>"` if MCP is unavailable.
+- Prefer the `salesforce-context` MCP tool `knowledge_search` for BM25 search with optional `domain`, `usage_context`, `object`, `field`, `metadata_type`, `status`, and `confidence` filters. Use `make knowledge-search QUERY="<QUERY>"` if MCP is unavailable.
 - To browse all notes in a domain, use the MCP tool `list_knowledge_domain` with the domain name (e.g. `billing`, `time-expense`).
 - To read a full note after finding it by search, use `get_knowledge_note` with the note path.
 - Treat the external Knowledge Base Git repository as the source of truth and `.ai/knowledge/` as the synchronized local copy.
@@ -54,6 +54,7 @@ Apply the following rules to every knowledge note before using it.
 - `missing_owner` — Flag as unverifiable; do not use without human confirmation.
 - `draft_status` — Require explicit human confirmation before citing in a solution design.
 - `missing_front_matter` — Treat as lowest-quality source; present with a warning.
+- `missing_purpose`, `missing_keywords`, `missing_source_file`, `missing_semantic_fields` — Treat as generated-note quality warnings; ask for human review before relying on the note.
 
 **Escalation rule:** If any note has `low_confidence`, `draft_status`, or `missing_owner` in its `risk_flags`, ask the human before using it in a solution design. Present the flags verbatim.
 

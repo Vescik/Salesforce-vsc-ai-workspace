@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Create or update local AI Workspace configuration."""
 
 from __future__ import annotations
@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -33,7 +34,7 @@ def _prepare_repo() -> None:
 def main(argv: list[str] | None = None) -> int:
     _ensure_min_python()
     _prepare_repo()
-    from ai_workspace.configuration.workspace_config import DEFAULT_CONFIG, mask_sensitive, resolve_repo_root
+    from ai_workspace.configuration.workspace_config import DEFAULT_CONFIG, resolve_repo_root
 
     parser = argparse.ArgumentParser(description="Configure local Salesforce AI Workspace settings.")
     parser.add_argument("--config", default=".ai/config/workspace.local.json")
@@ -46,6 +47,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ado-org", default=None)
     parser.add_argument("--ado-project", default=None)
     parser.add_argument("--disable-ado", action="store_true")
+    parser.add_argument("--azure-wiki-repo", default=None)
+    parser.add_argument("--azure-wiki-branch", default=None)
+    parser.add_argument("--azure-wiki-vendor-dir", default=None)
+    parser.add_argument("--enable-azure-wiki", action="store_true")
+    parser.add_argument("--disable-azure-wiki", action="store_true")
+    parser.add_argument("--enable-wiki-push", action="store_true")
+    parser.add_argument("--disable-wiki-push", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--non-interactive", action="store_true")
     args = parser.parse_args(argv)
@@ -76,6 +84,13 @@ def main(argv: list[str] | None = None) -> int:
             args.ado_org is not None,
             args.ado_project is not None,
             args.disable_ado,
+            args.azure_wiki_repo is not None,
+            args.azure_wiki_branch,
+            args.azure_wiki_vendor_dir,
+            args.enable_azure_wiki,
+            args.disable_azure_wiki,
+            args.enable_wiki_push,
+            args.disable_wiki_push,
         ]
     ):
         _apply_args(config, args)
@@ -95,13 +110,21 @@ def main(argv: list[str] | None = None) -> int:
     print("Next steps:")
     alias = config["salesforce"]["default_dev_org_alias"] or "IntDev"
     print(f"- sf org login web --alias {alias}")
-    print("- make doctor")
-    print("- make ai-index-repo")
+    print("- .\\scripts\\workspace.ps1 doctor")
+    print("- .\\scripts\\workspace.ps1 ai-index-repo")
     if config["knowledge_base"]["enabled"]:
-        print(f"- make knowledge-sync KB_REPO={mask_sensitive(config['knowledge_base']['repo_url'])}")
-        print("- make knowledge-index")
+        if config["knowledge_base"].get("repo_url"):
+            print("- .\\scripts\\workspace.ps1 knowledge-sync")
+        else:
+            print("- Configure `knowledge_base.repo_url` or set KB_REPO before running knowledge-sync")
+        print("- .\\scripts\\workspace.ps1 knowledge-index")
     if config.get("azure_devops", {}).get("enabled"):
         print("- Start VS Code MCP server `ado-remote-mcp`, then run /fetch-us <WORK_ITEM_ID>")
+    if config.get("azure_wiki", {}).get("enabled"):
+        if config["azure_wiki"].get("repo_url"):
+            print("- .\\scripts\\workspace.ps1 wiki-dry-run -WorkItem <WORK_ITEM_ID> -WikiTitle \"<title>\" -WikiSource <source-path>")
+        else:
+            print("- Configure `azure_wiki.repo_url` or set AZURE_WIKI_REPO before running wiki commands")
     return 0
 
 
@@ -119,6 +142,7 @@ def _apply_args(config: dict[str, Any], args: argparse.Namespace) -> None:
     salesforce = config.setdefault("salesforce", {})
     knowledge = config.setdefault("knowledge_base", {})
     azure_devops = config.setdefault("azure_devops", {})
+    azure_wiki = config.setdefault("azure_wiki", {})
     if args.dev_org:
         salesforce["default_dev_org_alias"] = args.dev_org
     if args.validation_org is not None:
@@ -141,12 +165,29 @@ def _apply_args(config: dict[str, Any], args: argparse.Namespace) -> None:
         azure_devops["enabled"] = True
     if args.disable_ado:
         azure_devops["enabled"] = False
+    if args.azure_wiki_repo is not None:
+        azure_wiki["repo_url"] = args.azure_wiki_repo
+    if args.azure_wiki_branch:
+        azure_wiki["branch"] = args.azure_wiki_branch
+    if args.azure_wiki_vendor_dir:
+        azure_wiki["vendor_dir"] = args.azure_wiki_vendor_dir
+    if args.enable_azure_wiki:
+        azure_wiki["enabled"] = True
+    if args.disable_azure_wiki:
+        azure_wiki["enabled"] = False
+    if azure_wiki.get("repo_url") and not args.disable_azure_wiki:
+        azure_wiki["enabled"] = True
+    if args.enable_wiki_push:
+        azure_wiki["push_enabled"] = True
+    if args.disable_wiki_push:
+        azure_wiki["push_enabled"] = False
 
 
 def _interactive_update(config: dict[str, Any]) -> None:
     salesforce = config.setdefault("salesforce", {})
     knowledge = config.setdefault("knowledge_base", {})
     azure_devops = config.setdefault("azure_devops", {})
+    azure_wiki = config.setdefault("azure_wiki", {})
     salesforce["default_dev_org_alias"] = _prompt("Default Salesforce dev org alias", str(salesforce.get("default_dev_org_alias") or "IntDev"))
     salesforce["validation_org_alias"] = _prompt("Validation org alias (optional)", str(salesforce.get("validation_org_alias") or ""))
     ado_org = _prompt("Azure DevOps organization", str(azure_devops.get("organization") or "YOUR_ADO_ORG"))
@@ -160,6 +201,15 @@ def _interactive_update(config: dict[str, Any]) -> None:
     default_enabled = "yes" if bool(knowledge.get("enabled") or kb_repo) else "no"
     enabled = _prompt("Enable Knowledge Base sync? yes/no", default_enabled).lower()
     knowledge["enabled"] = enabled in {"y", "yes", "true", "1"}
+    wiki_repo = _prompt("Azure Wiki repo URL (optional)", str(azure_wiki.get("repo_url") or ""))
+    azure_wiki["repo_url"] = wiki_repo
+    azure_wiki["branch"] = _prompt("Azure Wiki branch", str(azure_wiki.get("branch") or "main"))
+    azure_wiki["vendor_dir"] = _prompt("Azure Wiki local vendor directory", str(azure_wiki.get("vendor_dir") or ".ai/vendor/azure-wiki"))
+    wiki_enabled_default = "yes" if bool(azure_wiki.get("enabled") or wiki_repo) else "no"
+    wiki_enabled = _prompt("Enable Azure Wiki draft tooling? yes/no", wiki_enabled_default).lower()
+    azure_wiki["enabled"] = wiki_enabled in {"y", "yes", "true", "1"}
+    wiki_push_enabled = _prompt("Enable Azure Wiki branch push locally? yes/no", "no").lower()
+    azure_wiki["push_enabled"] = wiki_push_enabled in {"y", "yes", "true", "1"}
 
 
 def _prompt(label: str, default: str) -> str:
@@ -173,9 +223,24 @@ def _patch_mcp_json(repo_root: Path, ado_org: str) -> None:
     if not mcp_path.exists():
         return
     original = mcp_path.read_text(encoding="utf-8")
-    if "YOUR_ADO_ORG" not in original:
+    try:
+        loaded = json.loads(original)
+    except json.JSONDecodeError:
+        patched = re.sub(r"https://mcp\.dev\.azure\.com/[^\"\\\s]+", f"https://mcp.dev.azure.com/{ado_org}", original)
+        if patched == original:
+            return
+        mcp_path.write_text(patched, encoding="utf-8")
+        print(f"Updated .vscode/mcp.json with ADO organization: {ado_org}")
         return
-    patched = original.replace("YOUR_ADO_ORG", ado_org)
+    servers = loaded.get("servers") if isinstance(loaded, dict) else None
+    server = servers.get("ado-remote-mcp") if isinstance(servers, dict) else None
+    if not isinstance(server, dict):
+        return
+    target_url = f"https://mcp.dev.azure.com/{ado_org}"
+    if server.get("url") == target_url:
+        return
+    server["url"] = target_url
+    patched = json.dumps(loaded, ensure_ascii=True, indent=2) + "\n"
     mcp_path.write_text(patched, encoding="utf-8")
     print(f"Updated .vscode/mcp.json with ADO organization: {ado_org}")
 

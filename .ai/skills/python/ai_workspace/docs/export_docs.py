@@ -18,6 +18,10 @@ PDF_SOURCES = [
     ("workspace-architecture-technical.md", "workspace-architecture-technical.pdf"),
     ("agents-prompts-skills-mcp-reference.md", "agents-prompts-skills-mcp-reference.pdf"),
     ("developer-process-runbook.md", "developer-process-runbook.pdf"),
+    ("knowledge-base-runbook.md", "knowledge-base-runbook.pdf"),
+    ("azure-wiki-publication-runbook.md", "azure-wiki-publication-runbook.pdf"),
+    ("troubleshooting.md", "troubleshooting.pdf"),
+    ("runbook-2.0-quality-checklist.md", "runbook-2.0-quality-checklist.pdf"),
 ]
 REQUIRED_DOCS = [
     "README.md",
@@ -28,6 +32,7 @@ REQUIRED_DOCS = [
     "developer-process-runbook.md",
     "knowledge-base-runbook.md",
     "azure-wiki-publication-runbook.md",
+    "runbook-2.0-quality-checklist.md",
     "security-and-governance.md",
     "troubleshooting.md",
     "appendix-command-reference.md",
@@ -88,11 +93,11 @@ def _write_manual_pdf_readme() -> None:
     (PDF_ROOT / "README.md").write_text(
         """# PDF Export Instructions
 
-No local PDF export tool was detected when `make docs-export-pdf` was run.
+No local PDF export tool was detected when `.\scripts\workspace.ps1 docs-export-pdf` was run.
 
 Manual options:
 
-- Install Pandoc and a PDF engine, then run `make docs-export-pdf`.
+- Install Pandoc and a PDF engine, then run `.\scripts\workspace.ps1 docs-export-pdf`.
 - Use a VS Code Markdown PDF extension on the Markdown files in `docs/workspace/`.
 - Open `docs/workspace/html/index.html` in a browser and use Print to PDF.
 
@@ -103,6 +108,10 @@ Expected PDF outputs when tooling is available:
 - `workspace-architecture-technical.pdf`
 - `agents-prompts-skills-mcp-reference.pdf`
 - `developer-process-runbook.pdf`
+- `knowledge-base-runbook.pdf`
+- `azure-wiki-publication-runbook.pdf`
+- `troubleshooting.pdf`
+- `runbook-2.0-quality-checklist.pdf`
 """,
         encoding="utf-8",
     )

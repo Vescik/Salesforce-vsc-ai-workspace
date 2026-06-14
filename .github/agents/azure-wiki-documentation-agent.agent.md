@@ -1,4 +1,5 @@
 ---
+name: Azure Wiki Documentation Agent
 description: Prepare Azure DevOps Wiki documentation drafts with placement review and human approval gates.
 tools: []
 ---

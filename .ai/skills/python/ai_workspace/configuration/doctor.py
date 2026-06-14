@@ -120,7 +120,7 @@ def _environment_checks(config: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _required_file_checks(repo_root: Path) -> list[dict[str, Any]]:
     files = [
-        "Makefile",
+        "scripts/workspace.ps1",
         ".vscode/tasks.json",
         ".github/copilot-instructions.md",
         "AGENTS.md",
@@ -314,10 +314,10 @@ def _next_steps(config: dict[str, Any]) -> list[str]:
     alias = get_salesforce_alias(config) or "IntDev"
     return [
         f"Authenticate Salesforce if needed: sf org login web --alias {alias}",
-        "Run: make setup",
-        "Run: make ai-index-repo",
-        "Run: make knowledge-index",
-        "Build context: make ai-context WORK_ITEM=EXAMPLE-WI QUERY=\"example\"",
+        "Run: .\\scripts\\workspace.ps1 setup",
+        "Run: .\\scripts\\workspace.ps1 ai-index-repo",
+        "Run: .\\scripts\\workspace.ps1 knowledge-index",
+        "Build context: .\\scripts\\workspace.ps1 ai-context -WorkItem EXAMPLE-WI -Query \"example\"",
     ]
 
 

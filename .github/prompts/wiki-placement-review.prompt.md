@@ -1,5 +1,7 @@
 ---
+name: wiki-placement-review
 description: Review whether an Azure Wiki page placement decision is correct.
+agent: azure-wiki-documentation-agent
 mode: ask
 ---
 

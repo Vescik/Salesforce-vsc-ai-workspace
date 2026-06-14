@@ -1,5 +1,7 @@
 ---
+name: solution-design-review
 description: Review a proposed Salesforce/KimbleOne solution design before implementation planning.
+agent: solution-design-reviewer
 mode: ask
 ---
 

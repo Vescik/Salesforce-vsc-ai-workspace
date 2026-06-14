@@ -140,10 +140,10 @@ def _next_steps(config: dict[str, Any]) -> list[str]:
     return [
         "Activate the venv if you created one.",
         f"Authenticate Salesforce: sf org login web --alias {alias}",
-        "Run: make doctor",
-        "Run: make ai-index-repo",
-        "Run: make knowledge-index",
-        "Build context: make ai-context WORK_ITEM=EXAMPLE-WI QUERY=\"example\"",
+        "Run: .\\scripts\\workspace.ps1 doctor",
+        "Run: .\\scripts\\workspace.ps1 ai-index-repo",
+        "Run: .\\scripts\\workspace.ps1 knowledge-index",
+        "Build context: .\\scripts\\workspace.ps1 ai-context -WorkItem EXAMPLE-WI -Query \"example\"",
     ]
 
 
