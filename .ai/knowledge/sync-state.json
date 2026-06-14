@@ -1,0 +1,155 @@
+{
+  "branch": "main",
+  "commit": "7f73efafd5a08faaa1684414b933aaf8c37e4281",
+  "copied_files": [
+    "README.md",
+    "decisions/ADR-001-devops-center-adoption.md",
+    "decisions/ADR-002-knowledge-base-structure.md",
+    "domains/billing/billing-schedule-rules.md",
+    "domains/billing/domain.md",
+    "domains/billing/invoice-approval-process.md",
+    "domains/general/devops-center-pipeline.md",
+    "domains/general/package-upgrade-notes.md",
+    "domains/resource-management/domain.md",
+    "domains/resource-management/resource-request-workflow.md",
+    "domains/time-expense/domain.md",
+    "domains/time-expense/timesheet-approval-flow.md",
+    "governance/data-handling-policy.md",
+    "index.yaml",
+    "object-notes/kmbi__Invoice__c.md",
+    "object-notes/kmbi__Resource__c.md",
+    "object-notes/kmbi__TimeEntry__c.md",
+    "process-maps/invoice-to-cash.md",
+    "process-maps/resource-booking-lifecycle.md"
+  ],
+  "knowledge_root": ".ai/knowledge",
+  "policy_path": ".ai/knowledge/sync-policy.yaml",
+  "skipped_files": [
+    {
+      "path": ".git/FETCH_HEAD",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/HEAD",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/ORIG_HEAD",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/config",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/description",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/applypatch-msg.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/commit-msg.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/fsmonitor-watchman.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/post-update.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/pre-applypatch.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/pre-commit.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/pre-merge-commit.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/pre-push.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/pre-rebase.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/pre-receive.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/prepare-commit-msg.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/push-to-checkout.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/sendemail-validate.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/hooks/update.sample",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/index",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/info/exclude",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/logs/HEAD",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/logs/refs/heads/main",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/logs/refs/remotes/origin/HEAD",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/objects/pack/pack-5f7fd51e7b5bbedf18d167f20233dd23a8e1a37c.idx",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/objects/pack/pack-5f7fd51e7b5bbedf18d167f20233dd23a8e1a37c.pack",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/objects/pack/pack-5f7fd51e7b5bbedf18d167f20233dd23a8e1a37c.rev",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/packed-refs",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/refs/heads/main",
+      "reason": "git_internal"
+    },
+    {
+      "path": ".git/refs/remotes/origin/HEAD",
+      "reason": "git_internal"
+    }
+  ],
+  "source_repo_url": "https://github.com/Vescik/Salesforce-knowledge-base.git",
+  "synced_at": "2026-06-13T14:34:58.544417+00:00",
+  "vendor_dir": ".ai/vendor/knowledge-base",
+  "warnings": [
+    "Missing front matter in `README.md`."
+  ]
+}

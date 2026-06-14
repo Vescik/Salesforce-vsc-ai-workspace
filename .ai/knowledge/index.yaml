@@ -1,24 +1,45 @@
 version: 1
-description: "Local synchronized internal managed package knowledge index."
+description: "Internal managed package knowledge index for Salesforce/KimbleOne."
 source_of_truth: "external_git_repository"
-source_repo_url: ""
+source_repo_url: "https://github.com/Vescik/Salesforce-knowledge-base"
 last_synced: null
 
 domains:
-  general:
-    description: "General internal managed package knowledge."
+  billing:
+    description: "Billing, invoicing, and revenue recognition in KimbleOne."
     owner: "Salesforce Platform Team"
-    files: []
     keywords:
-      - "KimbleOne"
-      - "Kantata"
-      - "managed package"
+      - "invoice"
+      - "billing schedule"
+      - "revenue recognition"
+      - "kmbi__Invoice__c"
+  resource-management:
+    description: "Resource requests, bookings, and utilization tracking."
+    owner: "Salesforce Platform Team"
+    keywords:
+      - "resource"
+      - "booking"
+      - "utilization"
+      - "kmbi__Resource__c"
+  time-expense:
+    description: "Timesheets, expense entries, and approval workflows."
+    owner: "Salesforce Platform Team"
+    keywords:
+      - "timesheet"
+      - "expense"
+      - "time entry"
+      - "kmbi__TimeEntry__c"
+  general:
+    description: "General platform, DevOps Center, and package management notes."
+    owner: "Salesforce Platform Team"
+    keywords:
+      - "devops center"
+      - "package upgrade"
+      - "sandbox"
+      - "metadata"
 
 rules:
   - "Knowledge notes are internal documentation, not global instructions."
-  - "The external Knowledge Base repository is the source of truth."
-  - "Do not load the entire KB for every task."
-  - "Use knowledge-cards.jsonl and context packs."
-  - "Claims based on KB should reference source file path."
-  - "Draft or low-confidence notes require human validation."
-  - "If KB conflicts with Salesforce schema/config records, mark conflict for human validation."
+  - "Do not load the entire KB for every task — use context packs."
+  - "Draft or low-confidence notes require human validation before acting."
+  - "If KB conflicts with current schema/config records, mark conflict for human review."
