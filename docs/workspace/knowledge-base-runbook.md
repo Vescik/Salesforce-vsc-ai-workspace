@@ -1,6 +1,6 @@
 # Knowledge Base Runbook
 
-> **Platform note:** All commands shown Windows (PowerShell) first, followed by Mac / Linux. VS Code Tasks are also available: Ctrl+Shift+P → Tasks: Run Task
+> **Platform note:** This branch uses the Windows PowerShell command surface. VS Code Tasks are also available: Ctrl+Shift+P -> Tasks: Run Task
 
 ## Why The Knowledge Base Exists
 
@@ -31,45 +31,67 @@ This path is ignored.
 Dry run:
 
 ```powershell
-# Windows (PowerShell)
 .\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "<repo-url-or-local-path>"
-```
-```bash
-# Mac / Linux
-make knowledge-sync-dry-run KB_REPO=<repo-url-or-local-path>
 ```
 
 Sync:
 
 ```powershell
-# Windows (PowerShell)
 .\scripts\workspace.ps1 knowledge-sync -KbRepo "<repo-url-or-local-path>"
 ```
-```bash
-# Mac / Linux
-make knowledge-sync KB_REPO=<repo-url-or-local-path>
+
+## Knowledge Base Creator 2.0 Flow
+
+Use `knowledge-create` for controlled source files staged under `.ai/knowledge/imports/`. Supported source types include PDF, CSV, Markdown, TXT, XML, and Salesforce metadata XML. The creator extracts text and structure locally, redacts likely sensitive values, splits large sources into logical notes, and generates draft/low-confidence Markdown with source references, semantic fields, search terms, and review actions.
+
+Create from one file:
+
+```powershell
+.\scripts\workspace.ps1 knowledge-create -KnowledgeSource ".ai/knowledge/imports/example.txt" -KnowledgeDomain "general" -KnowledgeTitle "Example Knowledge Note"
+```
+
+Preview without writing notes:
+
+```powershell
+.\scripts\workspace.ps1 knowledge-create-dry-run -KnowledgeSource ".ai/knowledge/imports/example.txt" -KnowledgeDomain "general" -KnowledgeTitle "Example Knowledge Note"
+```
+
+Create from a manifest:
+
+```powershell
+.\scripts\workspace.ps1 knowledge-create-manifest -KnowledgeManifest ".ai/templates/knowledge-import-manifest.yaml"
+```
+
+`knowledge-import` and `knowledge-import-manifest` remain backward-compatible aliases.
+
+Validate:
+
+```powershell
+.\scripts\workspace.ps1 knowledge-validate
 ```
 
 Index:
 
 ```powershell
-# Windows (PowerShell)
 .\scripts\workspace.ps1 knowledge-index
 ```
-```bash
-# Mac / Linux
-make knowledge-index
+
+Build semantic graph:
+
+```powershell
+.\scripts\workspace.ps1 knowledge-graph
 ```
 
 Search:
 
 ```powershell
-# Windows (PowerShell)
 .\scripts\workspace.ps1 knowledge-search -Query "invoice approval"
 ```
-```bash
-# Mac / Linux
-make knowledge-search QUERY="invoice approval"
+
+Filtered search examples:
+
+```powershell
+.\scripts\workspace.ps1 knowledge-search -Query "approval status" -KnowledgeSearchFlags "--object Invoice__c --field Status__c --usage-context 'Solution Design'"
 ```
 
 ## Folder Structure
@@ -97,6 +119,10 @@ Each approved note should include:
 - last_reviewed
 - source
 - evidence or owner validation
+- purpose
+- source_format and source_checksum when generated
+- usage_context, tags, aliases, key_concepts, and keywords
+- related Salesforce objects, fields, metadata, processes, integrations, dependencies, and business rules when detected
 
 Use the template in `.ai/templates/knowledge-note.md`.
 
@@ -109,7 +135,7 @@ Use the template in `.ai/templates/knowledge-note.md`.
 
 ## How Context Packs Use Knowledge
 
-`make knowledge-index` turns curated Markdown notes into `knowledge-cards.jsonl`. `make ai-context` searches those cards and includes relevant excerpts under the Work Item context pack.
+`.\scripts\workspace.ps1 knowledge-index` turns curated Markdown notes into `knowledge-cards.jsonl`. `.\scripts\workspace.ps1 knowledge-graph` builds local relationships between notes, source files, metadata components, objects, fields, processes, business rules, and Work Items. `.\scripts\workspace.ps1 ai-context` searches those cards and includes relevant excerpts under the Work Item context pack.
 
 Knowledge is included as supporting evidence. Prompts should still require acceptance criteria and source artifacts.
 
@@ -134,6 +160,6 @@ Knowledge is included as supporting evidence. Prompts should still require accep
 
 - Repo access denied: verify Git credentials and repository permissions.
 - Wrong branch: pass `KB_BRANCH=<branch>`.
-- Notes not appearing in context: run `make knowledge-index` after sync.
+- Notes not appearing in context: run `.\scripts\workspace.ps1 knowledge-index` after sync.
 - Raw import rejected: curate the content into Markdown and remove sensitive fields.
 - Conflicting notes: keep both only if clearly labeled and escalate to a domain owner.

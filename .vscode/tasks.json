@@ -200,9 +200,33 @@
       "problemMatcher": []
     },
     {
+      "label": "AI: Create Knowledge File",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 knowledge-create -KnowledgeSource \"${input:knowledgeSource}\" -KnowledgeDomain \"${input:knowledgeDomain}\" -KnowledgeTitle \"${input:knowledgeTitle}\" -KnowledgeOwner \"${input:knowledgeOwner}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Create Knowledge File Dry Run",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 knowledge-create-dry-run -KnowledgeSource \"${input:knowledgeSource}\" -KnowledgeDomain \"${input:knowledgeDomain}\" -KnowledgeTitle \"${input:knowledgeTitle}\" -KnowledgeOwner \"${input:knowledgeOwner}\"",
+      "problemMatcher": []
+    },
+    {
       "label": "AI: Import Knowledge Manifest",
       "type": "shell",
       "command": ".\\scripts\\workspace.ps1 knowledge-import-manifest -KnowledgeManifest \"${input:knowledgeManifest}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Create Knowledge Manifest",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 knowledge-create-manifest -KnowledgeManifest \"${input:knowledgeManifest}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Index Knowledge Base",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 knowledge-index",
       "problemMatcher": []
     },
     {
@@ -212,27 +236,21 @@
       "problemMatcher": []
     },
     {
-      "label": "AI: Index Metadata Knowledge",
+      "label": "AI: Build Knowledge Index YAML",
       "type": "shell",
-      "command": ".\\scripts\\workspace.ps1 metadata-knowledge-index",
+      "command": ".\\scripts\\workspace.ps1 knowledge-index-yaml",
       "problemMatcher": []
     },
     {
-      "label": "AI: Emit Knowledge YAML Index",
+      "label": "AI: Build Metadata Knowledge Index",
       "type": "shell",
-      "command": ".\\scripts\\workspace.ps1 knowledge-index-yaml",
+      "command": ".\\scripts\\workspace.ps1 metadata-knowledge-index",
       "problemMatcher": []
     },
     {
       "label": "AI: Build Knowledge Graph",
       "type": "shell",
       "command": ".\\scripts\\workspace.ps1 knowledge-graph",
-      "problemMatcher": []
-    },
-    {
-      "label": "AI: Index Knowledge Base",
-      "type": "shell",
-      "command": ".\\scripts\\workspace.ps1 knowledge-index",
       "problemMatcher": []
     },
     {

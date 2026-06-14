@@ -36,6 +36,15 @@
     "source_file": {
       "type": "string"
     },
+    "source_format": {
+      "type": "string"
+    },
+    "source_checksum": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
     "owner": {
       "type": "string",
       "minLength": 1
@@ -57,7 +66,38 @@
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },
+    "usage_context": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Solution Design",
+          "Development",
+          "Code Review",
+          "Testing",
+          "Deployment",
+          "Troubleshooting",
+          "Documentation"
+        ]
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "key_concepts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "related_objects": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "related_fields": {
       "type": "array",
       "items": { "type": "string" }
     },
@@ -65,7 +105,23 @@
       "type": "array",
       "items": { "type": "string" }
     },
+    "related_metadata": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "related_processes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "integration_points": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "business_rules": {
       "type": "array",
       "items": { "type": "string" }
     },

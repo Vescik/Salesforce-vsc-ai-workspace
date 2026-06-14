@@ -44,10 +44,21 @@ IMPORTANT_KEYS = {
     # knowledge card fields
     "title",
     "keywords",
+    "weighted_terms",
+    "purpose",
+    "usage_context",
+    "tags",
+    "aliases",
+    "key_concepts",
     "domain",
     "related_objects",
+    "related_fields",
     "related_config_objects",
+    "related_metadata",
     "related_processes",
+    "integration_points",
+    "dependencies",
+    "business_rules",
     "summary",
 }
 
@@ -170,7 +181,9 @@ def search_jsonl(
 
     expanded_query = _expand_query_lazy(query, synonyms)
     query_terms = tokenize(expanded_query)
-    stats = corpus_stats if corpus_stats is not None else (load_or_build_corpus_stats(source) if mode == "bm25" else None)
+    stats = corpus_stats if corpus_stats is not None else (
+        load_or_build_corpus_stats(source, cache_path=source.parent / "_search-stats.json") if mode == "bm25" else None
+    )
 
     records: list[dict[str, Any]] = []
     with source.open("r", encoding="utf-8") as handle:

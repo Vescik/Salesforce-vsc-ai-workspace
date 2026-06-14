@@ -57,6 +57,8 @@ def main(argv: list[str] | None = None) -> int:
     field_cards = _read_jsonl(index_dir / "field-cards.jsonl")
 
     _add_note_nodes(nodes, note_cards)
+    _add_note_semantic_nodes(nodes, note_cards)
+    _add_source_file_nodes(nodes, note_cards)
     _add_metadata_nodes(nodes, metadata_cards)
     _add_object_nodes(nodes, sobject_cards, note_cards, metadata_cards)
     _add_field_nodes(nodes, field_cards)
@@ -127,6 +129,62 @@ def _add_metadata_nodes(nodes: dict[str, dict[str, Any]], metadata_cards: list[d
         })
 
 
+def _add_source_file_nodes(nodes: dict[str, dict[str, Any]], note_cards: list[dict[str, Any]]) -> None:
+    for card in note_cards:
+        source_file = str(card.get("source_file") or "").strip()
+        if not source_file:
+            continue
+        node_id = f"file:{source_file}"
+        nodes.setdefault(node_id, {
+            "id": node_id,
+            "type": "source_file",
+            "label": Path(source_file).name,
+            "path": source_file,
+            "source_format": str(card.get("source_format") or ""),
+            "source_checksum": str(card.get("source_checksum") or ""),
+        })
+
+
+def _add_note_semantic_nodes(nodes: dict[str, dict[str, Any]], note_cards: list[dict[str, Any]]) -> None:
+    for card in note_cards:
+        for value in card.get("related_fields") or []:
+            value = str(value).strip()
+            if value and "." in value:
+                nodes.setdefault(f"field:{value}", {
+                    "id": f"field:{value}",
+                    "type": "field",
+                    "label": value,
+                    "source": "knowledge_note",
+                })
+        for value in card.get("related_metadata") or []:
+            value = str(value).strip()
+            if value:
+                metadata_type, api_name = _metadata_parts(value)
+                node_id = f"metadata_component:{metadata_type}:{api_name}"
+                nodes.setdefault(node_id, {
+                    "id": node_id,
+                    "type": "metadata_component",
+                    "metadata_type": metadata_type,
+                    "label": api_name,
+                    "source": "knowledge_note",
+                })
+        for node_type, field in (
+            ("integration", "integration_points"),
+            ("dependency", "dependencies"),
+            ("business_rule", "business_rules"),
+        ):
+            for value in card.get(field) or []:
+                value = str(value).strip()
+                if not value:
+                    continue
+                slug = _slug(value[:80])
+                nodes.setdefault(f"{node_type}:{slug}", {
+                    "id": f"{node_type}:{slug}",
+                    "type": node_type,
+                    "label": value[:180],
+                })
+
+
 def _add_object_nodes(
     nodes: dict[str, dict[str, Any]],
     sobject_cards: list[dict[str, Any]],
@@ -152,6 +210,10 @@ def _add_object_nodes(
         for value in card.get("related_objects") or []:
             if str(value).strip():
                 referenced.add(str(value).strip())
+        for value in card.get("related_fields") or []:
+            value = str(value).strip()
+            if "." in value:
+                referenced.add(value.split(".", 1)[0])
     for card in metadata_cards:
         for value in (card.get("references") or {}).get("objects", []):
             if str(value).strip():
@@ -252,10 +314,31 @@ def _add_note_edges(edges: list[dict[str, str]], note_cards: list[dict[str, Any]
             value = str(value).strip()
             if value:
                 edges.append({"source": source_id, "target": f"object:{value}", "type": "mentions"})
+        for value in card.get("related_fields") or []:
+            value = str(value).strip()
+            if value and "." in value:
+                edges.append({"source": source_id, "target": f"field:{value}", "type": "mentions"})
+        for value in card.get("related_metadata") or []:
+            value = str(value).strip()
+            if value:
+                metadata_type, api_name = _metadata_parts(value)
+                edges.append({"source": source_id, "target": f"metadata_component:{metadata_type}:{api_name}", "type": "mentions"})
         for value in card.get("related_processes") or []:
             slug = _slug(str(value))
             if slug:
                 edges.append({"source": source_id, "target": f"process:{slug}", "type": "mentions"})
+        for value in card.get("integration_points") or []:
+            slug = _slug(str(value)[:80])
+            if slug:
+                edges.append({"source": source_id, "target": f"integration:{slug}", "type": "mentions"})
+        for value in card.get("dependencies") or []:
+            slug = _slug(str(value)[:80])
+            if slug:
+                edges.append({"source": source_id, "target": f"dependency:{slug}", "type": "depends_on"})
+        for value in card.get("business_rules") or []:
+            slug = _slug(str(value)[:80])
+            if slug:
+                edges.append({"source": source_id, "target": f"business_rule:{slug}", "type": "documents"})
         source_file = str(card.get("source_file") or "").strip()
         if source_file:
             edges.append({"source": source_id, "target": f"file:{source_file}", "type": "derived_from"})
@@ -384,6 +467,22 @@ def _slug_from_path(path_value: Any, fallback: str = "") -> str:
 
 def _slug(value: str) -> str:
     return re.sub(r"[^A-Za-z0-9_-]+", "-", value.strip().lower()).strip("-")
+
+
+def _metadata_parts(value: str) -> tuple[str, str]:
+    if ":" in value:
+        left, right = value.split(":", 1)
+        return _slug(left) or "metadata", right.strip() or value
+    lowered = value.lower()
+    if "trigger" in lowered:
+        return "apex_trigger", value
+    if "flow" in lowered:
+        return "flow", value
+    if "validation" in lowered:
+        return "validation_rule", value
+    if value.endswith("Service") or value.endswith("Controller") or value.endswith("Handler"):
+        return "apex_class", value
+    return "metadata", value
 
 
 def _display_path(path: Path) -> str:

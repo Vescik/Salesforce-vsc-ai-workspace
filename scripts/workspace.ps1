@@ -15,7 +15,9 @@
     .\scripts\workspace.ps1 knowledge-sync -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
     .\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
     .\scripts\workspace.ps1 knowledge-search -Query "invoice approval"
-    .\scripts\workspace.ps1 knowledge-import -KnowledgeSource ".ai/knowledge/imports/note.txt" -KnowledgeDomain "billing" -KnowledgeTitle "Invoice Rules"
+    .\scripts\workspace.ps1 knowledge-create -KnowledgeSource ".ai/knowledge/imports/note.txt" -KnowledgeDomain "billing" -KnowledgeTitle "Invoice Rules"
+    .\scripts\workspace.ps1 knowledge-validate
+    .\scripts\workspace.ps1 knowledge-graph
     .\scripts\workspace.ps1 wiki-dry-run -WorkItem KIM-1234 -WikiTitle "Invoice Routing" -WikiSource "docs/architecture/KIM-1234.md" -AzureWikiRepo "https://dev.azure.com/ORG/PROJECT/_git/PROJECT.wiki"
     .\scripts\workspace.ps1 wi-precheck -WorkItem KIM-1234 -BaseRef "HEAD~1"
     .\scripts\workspace.ps1 wi-precheck-strict -WorkItem KIM-1234 -BaseRef "origin/main"
@@ -49,16 +51,17 @@ param(
     [string]$KnowledgeValidationMd = ".ai/outputs/knowledge-import/validation-report.md",
     [int]$KnowledgeMaxAgeDays     = 180,
     [string]$KnowledgeValidateFlags = "",
+    [string]$KnowledgeDomain      = "general",
+    [string]$KnowledgeTitle       = "",
+    [string]$KnowledgeOwner       = "Salesforce Platform Team",
+    [string]$KnowledgeImportFlags = "",
+    [string]$KnowledgeSearchFlags = "",
     [string]$ForceAppRoot         = "force-app",
     [string]$MetadataKnowledgeIndex = ".ai/context/index/metadata-knowledge-cards.jsonl",
     [string]$MetadataKnowledgeSummary = ".ai/context/index/metadata-knowledge-summary.json",
     [string]$KnowledgeGraph       = ".ai/context/index/knowledge-graph.json",
     [string]$KnowledgeIndexYaml   = ".ai/context/index/knowledge-index-files.yaml",
     [int]$KnowledgeGraphAdjacencyCap = 200,
-    [string]$KnowledgeDomain      = "general",
-    [string]$KnowledgeTitle       = "",
-    [string]$KnowledgeOwner       = "Salesforce Platform Team",
-    [string]$KnowledgeImportFlags = "",
     [string]$AzureWikiRepo        = "",
     [string]$AzureWikiBranch      = "main",
     [string]$AzureWikiVendorDir   = ".ai/vendor/azure-wiki",
@@ -139,13 +142,16 @@ function Invoke-Help {
     Write-Host "  knowledge-sync               -KbRepo <git-url-or-local-path>"
     Write-Host "  knowledge-sync-dry-run       -KbRepo <git-url-or-local-path>"
     Write-Host "  knowledge-index"
-    Write-Host "  knowledge-import             -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle <title>"
-    Write-Host "  knowledge-import-manifest    -KnowledgeManifest <yaml>"
+    Write-Host "  knowledge-create             -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle <title>"
+    Write-Host "  knowledge-create-dry-run     -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle <title>"
+    Write-Host "  knowledge-create-manifest    -KnowledgeManifest <yaml>"
+    Write-Host "  knowledge-import             -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle <title>  # alias"
+    Write-Host "  knowledge-import-manifest    -KnowledgeManifest <yaml>  # alias"
     Write-Host "  knowledge-search             -Query 'invoice approval'"
     Write-Host "  knowledge-validate"
     Write-Host "  metadata-knowledge-index"
-    Write-Host "  knowledge-graph"
     Write-Host "  knowledge-index-yaml"
+    Write-Host "  knowledge-graph"
     Write-Host "  knowledge-push-dry-run       -KbRepo <git-url>"
     Write-Host "  knowledge-push               -KbRepo <git-url>"
     Write-Host "  wiki-dry-run                 -WorkItem KIM-1234 -WikiTitle '...' -WikiSource docs/... -AzureWikiRepo <url>"
@@ -376,7 +382,9 @@ function Invoke-AiCheckPython {
         "ai_workspace.config.config_impact",
         "ai_workspace.config.config_pack_builder",
         "ai_workspace.config.config_diff",
+        "ai_workspace.knowledge.create_knowledge",
         "ai_workspace.knowledge.import_knowledge",
+        "ai_workspace.knowledge.semantic",
         "ai_workspace.knowledge.sync_knowledge_repo",
         "ai_workspace.knowledge.index_knowledge",
         "ai_workspace.knowledge.knowledge_search",
@@ -447,10 +455,10 @@ function Invoke-KnowledgeIndex {
     )
 }
 
-function Invoke-KnowledgeImport {
+function Invoke-KnowledgeCreate {
     Require-Param $KnowledgeSource "KnowledgeSource"
     $args = @(
-        "-m", "ai_workspace.knowledge.import_knowledge",
+        "-m", "ai_workspace.knowledge.create_knowledge",
         "--source", $KnowledgeSource,
         "--domain", $KnowledgeDomain,
         "--title", $KnowledgeTitle,
@@ -462,9 +470,14 @@ function Invoke-KnowledgeImport {
     Invoke-Py $args
 }
 
-function Invoke-KnowledgeImportManifest {
+function Invoke-KnowledgeCreateDryRun {
+    $script:KnowledgeImportFlags = ($KnowledgeImportFlags + " --dry-run").Trim()
+    Invoke-KnowledgeCreate
+}
+
+function Invoke-KnowledgeCreateManifest {
     $args = @(
-        "-m", "ai_workspace.knowledge.import_knowledge",
+        "-m", "ai_workspace.knowledge.create_knowledge",
         "--manifest", $KnowledgeManifest
     )
     if ($KnowledgeImportFlags) {
@@ -473,12 +486,67 @@ function Invoke-KnowledgeImportManifest {
     Invoke-Py $args
 }
 
+function Invoke-KnowledgeImport {
+    Invoke-KnowledgeCreate
+}
+
+function Invoke-KnowledgeImportManifest {
+    Invoke-KnowledgeCreateManifest
+}
+
 function Invoke-KnowledgeSearch {
-    Invoke-Py @(
+    $args = @(
         "-m", "ai_workspace.knowledge.knowledge_search",
         "--query", $Query,
         "--index", $KnowledgeIndex,
         "--top-k", "10"
+    )
+    if ($KnowledgeSearchFlags) {
+        $args += $KnowledgeSearchFlags -split "\s+"
+    }
+    Invoke-Py $args
+}
+
+function Invoke-KnowledgeValidate {
+    $args = @(
+        "-m", "ai_workspace.knowledge.validate_knowledge",
+        "--knowledge-root", $KnowledgeRoot,
+        "--schema", $KnowledgeSchema,
+        "--max-age-days", "$KnowledgeMaxAgeDays",
+        "--json-out", $KnowledgeValidationJson,
+        "--md-out", $KnowledgeValidationMd
+    )
+    Invoke-Py $args
+}
+
+function Invoke-MetadataKnowledgeIndex {
+    Invoke-Py @(
+        "-m", "ai_workspace.knowledge.metadata_to_knowledge",
+        "--force-app-root", $ForceAppRoot,
+        "--out", $MetadataKnowledgeIndex,
+        "--summary-out", $MetadataKnowledgeSummary
+    )
+}
+
+function Invoke-KnowledgeIndexYaml {
+    Invoke-Py @(
+        "-m", "ai_workspace.knowledge.index_knowledge",
+        "--knowledge-root", $KnowledgeRoot,
+        "--out", $KnowledgeIndex,
+        "--emit-index-yaml", $KnowledgeIndexYaml
+    )
+}
+
+function Invoke-KnowledgeGraph {
+    Invoke-KnowledgeIndexYaml
+    Invoke-MetadataKnowledgeIndex
+    Invoke-Py @(
+        "-m", "ai_workspace.knowledge.build_graph",
+        "--knowledge-root", $KnowledgeRoot,
+        "--index-dir", $IndexDir,
+        "--work-items-dir", ".ai/context/work-items",
+        "--out", $KnowledgeGraph,
+        "--adjacency-cap", "$KnowledgeGraphAdjacencyCap"
     )
 }
 
@@ -708,13 +776,16 @@ switch ($Target) {
     "knowledge-sync"          { Invoke-KnowledgeSync }
     "knowledge-sync-dry-run"  { Invoke-KnowledgeSyncDryRun }
     "knowledge-index"         { Invoke-KnowledgeIndex }
+    "knowledge-create"        { Invoke-KnowledgeCreate }
+    "knowledge-create-dry-run" { Invoke-KnowledgeCreateDryRun }
+    "knowledge-create-manifest" { Invoke-KnowledgeCreateManifest }
     "knowledge-import"        { Invoke-KnowledgeImport }
     "knowledge-import-manifest" { Invoke-KnowledgeImportManifest }
     "knowledge-search"        { Invoke-KnowledgeSearch }
     "knowledge-validate"      { Invoke-KnowledgeValidate }
     "metadata-knowledge-index" { Invoke-MetadataKnowledgeIndex }
-    "knowledge-graph"         { Invoke-KnowledgeGraph }
     "knowledge-index-yaml"    { Invoke-KnowledgeIndexYaml }
+    "knowledge-graph"         { Invoke-KnowledgeGraph }
     "knowledge-push-dry-run"  { Invoke-KnowledgePushDryRun }
     "knowledge-push"          { Invoke-KnowledgePush }
     "wiki-dry-run"            { Invoke-WikiDryRun }
