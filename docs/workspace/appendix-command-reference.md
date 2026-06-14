@@ -38,15 +38,23 @@ Commands are defined in `Makefile`. Commands marked "writes files" create or upd
 | `make knowledge-sync-dry-run KB_REPO=<repo>` | Preview KB sync. | Git repo access | Yes | Writes reports only. |
 | `make knowledge-sync KB_REPO=<repo>` | Sync curated KB notes. | Git repo access | Yes | Vendor clone ignored. |
 | `make knowledge-index` | Index KB notes. | No | Yes | Writes `knowledge-cards.jsonl`. |
-| `make knowledge-search QUERY="<topic>"` | Search KB cards. | No | No | Local index search. |
-| `make knowledge-import ...` | Convert controlled source to KB note. | No | Yes | No raw dumps/secrets. |
-| `make knowledge-import-manifest ...` | Import from manifest. | No | Yes | Uses local manifest. |
+| `make knowledge-create ...` | Convert controlled source to structured draft KB notes. | No | Yes | PDF/CSV/MD/TXT/XML; no raw dumps/secrets. |
+| `make knowledge-create-dry-run ...` | Preview source conversion without writing notes. | No | No | Writes no notes or reports. |
+| `make knowledge-create-manifest ...` | Create notes from manifest. | No | Yes | Uses local manifest. |
+| `make knowledge-import ...` | Backward-compatible alias for `knowledge-create`. | No | Yes | Kept for existing prompts/tasks. |
+| `make knowledge-import-manifest ...` | Backward-compatible alias for `knowledge-create-manifest`. | No | Yes | Kept for existing prompts/tasks. |
+| `make knowledge-validate` | Validate note schema, freshness, quality, secrets, and Salesforce IDs. | No | Yes | Writes validation reports. |
+| `make metadata-knowledge-index` | Build local metadata knowledge cards from `force-app`. | No | Yes | Local-only derived index. |
+| `make knowledge-index-yaml` | Emit machine-readable per-file KB index YAML. | No | Yes | Used by MCP slug lookup. |
+| `make knowledge-graph` | Build semantic KB graph. | No | Yes | Notes, source files, objects, fields, metadata, business rules. |
+| `make knowledge-search QUERY="<topic>"` | Search KB cards with BM25 and semantic fields. | No | No | Optional filters via `KNOWLEDGE_SEARCH_FLAGS`. |
 
 ## Context
 
 | Command | Purpose | Requires auth | Writes files | Notes |
 | --- | --- | --- | --- | --- |
 | `make ai-context WORK_ITEM=<id> QUERY="<topic>"` | Build Work Item context pack. | No | Yes | Uses local indexes. |
+| `make ai-context-auto WORK_ITEM=<id>` | Build Work Item context pack from AC keywords. | No | Yes | Extracts query terms from local Work Item artifacts. |
 | `make ai-context-example` | Build example context. | No | Yes | Example generated files are ignored. |
 | `make ai-list-outputs WORK_ITEM=<id>` | List generated outputs. | No | No | Diagnostic. |
 | `make ai-clean-context` | Remove generated context indexes/files. | No | Yes | Deletes generated local artifacts only. |
@@ -75,6 +83,8 @@ Commands are defined in `Makefile`. Commands marked "writes files" create or upd
 
 | Command | Purpose | Requires auth | Writes files | Notes |
 | --- | --- | --- | --- | --- |
+| `make ac-coverage WORK_ITEM=<id>` | Check design coverage for each acceptance criterion. | No | Yes | Writes AC coverage and traceability artifacts. |
+| `make design-lint WORK_ITEM=<id>` | Lint solution design evidence and metadata references. | No | Yes | Fails on blocking findings. |
 | `make wi-precheck WORK_ITEM=<id> BASE_REF=<ref>` | Local Work Item precheck. | No | Yes | Advisory findings. |
 | `make wi-precheck-strict WORK_ITEM=<id> BASE_REF=<ref>` | Strict precheck. | No | Yes | Fails on high findings. |
 | `make wi-scope-check WORK_ITEM=<id>` | Scope check wrapper. | No | Yes | Calls precheck. |

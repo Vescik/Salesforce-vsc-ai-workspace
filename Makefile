@@ -10,7 +10,7 @@ QUERY ?= field ui visibility flow config
 INDEX_DIR ?= .ai/context/index
 WORK_ITEM_DIR ?= .ai/context/work-items/$(WORK_ITEM)
 PYTHONPATH_VALUE ?= .ai/skills/python
-PYTHON ?= $(shell command -v python3.11 >/dev/null 2>&1 && printf python3.11 || (command -v python >/dev/null 2>&1 && printf python || printf python3))
+PYTHON ?= $(shell command -v python3.11 >/dev/null 2>&1 && printf python3.11 || (command -v python3 >/dev/null 2>&1 && printf python3 || printf python))
 WORKSPACE_CONFIG ?= .ai/config/workspace.local.json
 REGISTRY ?= config/data-promotion/config-object-registry.yaml
 MASKING_POLICY ?= config/data-promotion/masking-policy.yaml
@@ -41,6 +41,7 @@ KNOWLEDGE_DOMAIN ?= general
 KNOWLEDGE_TITLE ?=
 KNOWLEDGE_OWNER ?= Salesforce Platform Team
 KNOWLEDGE_IMPORT_FLAGS ?=
+KNOWLEDGE_SEARCH_FLAGS ?=
 AZURE_WIKI_REPO ?=
 AZURE_WIKI_BRANCH ?= main
 AZURE_WIKI_VENDOR_DIR ?= .ai/vendor/azure-wiki
@@ -52,7 +53,7 @@ WIKI_APPROVAL_NOTE ?=
 DOCS_ROOT ?= docs/workspace
 DOCS_HTML ?= $(DOCS_ROOT)/html/index.html
 
-.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-validate metadata-knowledge-index knowledge-graph knowledge-index-yaml ai-context-auto ac-coverage design-lint knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
+.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-create knowledge-create-dry-run knowledge-create-manifest knowledge-import knowledge-import-manifest knowledge-search knowledge-validate metadata-knowledge-index knowledge-graph knowledge-index-yaml ai-context-auto ac-coverage design-lint knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
 
 help:
 	@echo "Copilot-only Salesforce AI Workspace commands"
@@ -80,8 +81,10 @@ help:
 	@echo "  make config-pack-skeleton WORK_ITEM=KIM-1234"
 	@echo "  make knowledge-sync-dry-run KB_REPO=<git-url-or-local-path>"
 	@echo "  make knowledge-sync KB_REPO=<git-url-or-local-path>"
-	@echo "  make knowledge-import KNOWLEDGE_SOURCE=.ai/knowledge/imports/example.txt KNOWLEDGE_DOMAIN=general KNOWLEDGE_TITLE=\"Example Knowledge Note\""
-	@echo "  make knowledge-import-manifest KNOWLEDGE_MANIFEST=.ai/templates/knowledge-import-manifest.yaml"
+	@echo "  make knowledge-create KNOWLEDGE_SOURCE=.ai/knowledge/imports/example.txt KNOWLEDGE_DOMAIN=general KNOWLEDGE_TITLE=\"Example Knowledge Note\""
+	@echo "  make knowledge-create-dry-run KNOWLEDGE_SOURCE=.ai/knowledge/imports/example.txt KNOWLEDGE_DOMAIN=general KNOWLEDGE_TITLE=\"Example Knowledge Note\""
+	@echo "  make knowledge-create-manifest KNOWLEDGE_MANIFEST=.ai/templates/knowledge-import-manifest.yaml"
+	@echo "  make knowledge-import KNOWLEDGE_SOURCE=.ai/knowledge/imports/example.txt KNOWLEDGE_DOMAIN=general KNOWLEDGE_TITLE=\"Example Knowledge Note\"  # alias"
 	@echo "  make knowledge-index"
 	@echo "  make knowledge-search QUERY=\"invoice approval\""
 	@echo "  make knowledge-validate"
@@ -231,7 +234,7 @@ ai-list-outputs:
 	@find $(WORK_ITEM_DIR) -maxdepth 2 -type f 2>/dev/null | sort || true
 
 ai-check-python:
-	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -c "import ai_workspace.configuration.workspace_config; import ai_workspace.configuration.bootstrap; import ai_workspace.configuration.doctor; import ai_workspace.indexers.index_repo_metadata; import ai_workspace.indexers.index_org_schema; import ai_workspace.indexers.index_config_records; import ai_workspace.indexers.build_context_pack; import ai_workspace.deployment.precheck_work_item; import ai_workspace.config.config_impact; import ai_workspace.config.config_pack_builder; import ai_workspace.config.config_diff; import ai_workspace.knowledge.import_knowledge; import ai_workspace.knowledge.sync_knowledge_repo; import ai_workspace.knowledge.index_knowledge; import ai_workspace.knowledge.knowledge_search; import ai_workspace.wiki.wiki_config; import ai_workspace.wiki.wiki_git; import ai_workspace.wiki.wiki_scanner; import ai_workspace.wiki.wiki_router; import ai_workspace.wiki.wiki_page_builder; import ai_workspace.wiki.wiki_publisher; import ai_workspace.docs.export_docs; import ai_workspace.mcp.salesforce_context_mcp; print('AI workspace Python imports OK')"
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -c "import ai_workspace.configuration.workspace_config; import ai_workspace.configuration.bootstrap; import ai_workspace.configuration.doctor; import ai_workspace.indexers.index_repo_metadata; import ai_workspace.indexers.index_org_schema; import ai_workspace.indexers.index_config_records; import ai_workspace.indexers.build_context_pack; import ai_workspace.knowledge.extract_ac_keywords; import ai_workspace.deployment.ac_coverage_check; import ai_workspace.deployment.design_lint; import ai_workspace.deployment.precheck_work_item; import ai_workspace.config.config_impact; import ai_workspace.config.config_pack_builder; import ai_workspace.config.config_diff; import ai_workspace.knowledge.create_knowledge; import ai_workspace.knowledge.import_knowledge; import ai_workspace.knowledge.semantic; import ai_workspace.knowledge.sync_knowledge_repo; import ai_workspace.knowledge.index_knowledge; import ai_workspace.knowledge.knowledge_search; import ai_workspace.knowledge.validate_knowledge; import ai_workspace.knowledge.metadata_to_knowledge; import ai_workspace.knowledge.build_graph; import ai_workspace.wiki.wiki_config; import ai_workspace.wiki.wiki_git; import ai_workspace.wiki.wiki_scanner; import ai_workspace.wiki.wiki_router; import ai_workspace.wiki.wiki_page_builder; import ai_workspace.wiki.wiki_publisher; import ai_workspace.docs.export_docs; import ai_workspace.mcp.salesforce_context_mcp; print('AI workspace Python imports OK')"
 
 config-impact:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.config.config_impact \
@@ -267,24 +270,32 @@ knowledge-index:
 		--knowledge-root "$(KNOWLEDGE_ROOT)" \
 		--out "$(KNOWLEDGE_INDEX)"
 
-knowledge-import:
-	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.import_knowledge \
+knowledge-create:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.create_knowledge \
 		--source "$(KNOWLEDGE_SOURCE)" \
 		--domain "$(KNOWLEDGE_DOMAIN)" \
 		--title "$(KNOWLEDGE_TITLE)" \
 		--owner "$(KNOWLEDGE_OWNER)" \
 		$(KNOWLEDGE_IMPORT_FLAGS)
 
-knowledge-import-manifest:
-	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.import_knowledge \
+knowledge-create-dry-run:
+	$(MAKE) knowledge-create KNOWLEDGE_IMPORT_FLAGS="$(KNOWLEDGE_IMPORT_FLAGS) --dry-run"
+
+knowledge-create-manifest:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.create_knowledge \
 		--manifest "$(KNOWLEDGE_MANIFEST)" \
 		$(KNOWLEDGE_IMPORT_FLAGS)
+
+knowledge-import: knowledge-create
+
+knowledge-import-manifest: knowledge-create-manifest
 
 knowledge-search:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.knowledge_search \
 		--query "$(QUERY)" \
 		--index "$(KNOWLEDGE_INDEX)" \
-		--top-k 10
+		--top-k 10 \
+		$(KNOWLEDGE_SEARCH_FLAGS)
 
 knowledge-validate:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.validate_knowledge \

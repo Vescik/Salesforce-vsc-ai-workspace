@@ -6,7 +6,7 @@
     },
     "salesforce-context": {
       "type": "stdio",
-      "command": "python",
+      "command": "python3",
       "args": [
         "-m",
         "ai_workspace.mcp.salesforce_context_mcp",

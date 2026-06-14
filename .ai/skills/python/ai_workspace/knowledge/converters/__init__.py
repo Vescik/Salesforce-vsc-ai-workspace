@@ -30,6 +30,10 @@ from typing import Any
 _SUFFIX_TO_FORMAT = {
     ".md": "md",
     ".markdown": "md",
+    ".txt": "txt",
+    ".text": "txt",
+    ".csv": "csv",
+    ".xml": "xml",
     ".docx": "docx",
     ".pptx": "pptx",
     ".xlsx": "xlsx",
@@ -76,6 +80,15 @@ def dispatch(path: Path | str) -> dict[str, Any]:
     if fmt == "md":
         from ai_workspace.knowledge.converters import markdown as _markdown
         return _markdown.convert(source)
+    if fmt == "txt":
+        from ai_workspace.knowledge.converters import text as _text
+        return _text.convert(source)
+    if fmt == "csv":
+        from ai_workspace.knowledge.converters import csv as _csv
+        return _csv.convert(source)
+    if fmt == "xml":
+        from ai_workspace.knowledge.converters import xml as _xml
+        return _xml.convert(source)
     if fmt == "docx":
         from ai_workspace.knowledge.converters import docx as _docx
         return _docx.convert(source)

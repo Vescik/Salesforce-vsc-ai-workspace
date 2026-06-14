@@ -620,20 +620,20 @@ keywords:
 
    Or call the MCP tool from Copilot: *"Rebuild the knowledge index"*
 
-### Workflow: Import a New Knowledge Note
+### Workflow: Create New Knowledge Notes
 
 1. Place your source file in `.ai/knowledge/imports/`
 
-2. Run import:
+2. Run the Knowledge Base Creator:
 
    ```powershell
    # Windows (PowerShell)
-   .\scripts\workspace.ps1 knowledge-import -KnowledgeSource .ai/knowledge/imports/billing-rules.txt -KnowledgeDomain billing -KnowledgeTitle "Billing Schedule Rules"
+   .\scripts\workspace.ps1 knowledge-create -KnowledgeSource .ai/knowledge/imports/billing-rules.txt -KnowledgeDomain billing -KnowledgeTitle "Billing Schedule Rules"
    ```
 
    ```bash
    # Mac / Linux
-   make knowledge-import \
+   make knowledge-create \
      KNOWLEDGE_SOURCE=.ai/knowledge/imports/billing-rules.txt \
      KNOWLEDGE_DOMAIN=billing \
      KNOWLEDGE_TITLE="Billing Schedule Rules"
@@ -644,19 +644,23 @@ keywords:
 4. Edit the note:
    - Set `status: reviewed`
    - Set `confidence: high | medium`
-   - Fill in `related_objects`, `keywords`, `last_reviewed`
+   - Fill in `purpose`, `usage_context`, `related_objects`, `related_fields`, `related_metadata`, `keywords`, and `last_reviewed`
    - Remove the "Review Required" checklist section
 
-5. Rebuild the index:
+5. Validate, index, and rebuild the graph:
 
    ```powershell
    # Windows (PowerShell)
+   .\scripts\workspace.ps1 knowledge-validate
    .\scripts\workspace.ps1 knowledge-index
+   .\scripts\workspace.ps1 knowledge-graph
    ```
 
    ```bash
    # Mac / Linux
+   make knowledge-validate
    make knowledge-index
+   make knowledge-graph
    ```
 
 ### Workflow: Search the Knowledge Base
@@ -864,8 +868,13 @@ make wiki-push-approved \
 | `.\scripts\workspace.ps1 knowledge-sync -KbRepo "<url>"` | `make knowledge-sync KB_REPO=<url>` | Sync external KB to `.ai/knowledge/` |
 | `.\scripts\workspace.ps1 knowledge-index` | `make knowledge-index` | Rebuild `knowledge-cards.jsonl` |
 | `.\scripts\workspace.ps1 knowledge-search -Query "invoice approval"` | `make knowledge-search QUERY="<topic>"` | Search knowledge index |
-| `.\scripts\workspace.ps1 knowledge-import -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle "<title>"` | `make knowledge-import KNOWLEDGE_SOURCE=<file> KNOWLEDGE_DOMAIN=<domain> KNOWLEDGE_TITLE="<title>"` | Import source file as KB note |
-| _(use `make knowledge-import-manifest`)_ | `make knowledge-import-manifest KNOWLEDGE_MANIFEST=<yaml>` | Batch import from manifest |
+| `.\scripts\workspace.ps1 knowledge-create -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle "<title>"` | `make knowledge-create KNOWLEDGE_SOURCE=<file> KNOWLEDGE_DOMAIN=<domain> KNOWLEDGE_TITLE="<title>"` | Create structured draft KB note(s) |
+| `.\scripts\workspace.ps1 knowledge-create-manifest -KnowledgeManifest <yaml>` | `make knowledge-create-manifest KNOWLEDGE_MANIFEST=<yaml>` | Batch create from manifest |
+| `.\scripts\workspace.ps1 knowledge-validate` | `make knowledge-validate` | Validate KB notes and quality gates |
+| `.\scripts\workspace.ps1 metadata-knowledge-index` | `make metadata-knowledge-index` | Build metadata-derived KB cards |
+| `.\scripts\workspace.ps1 knowledge-index-yaml` | `make knowledge-index-yaml` | Emit per-file YAML index |
+| `.\scripts\workspace.ps1 knowledge-graph` | `make knowledge-graph` | Build semantic knowledge graph |
+| `.\scripts\workspace.ps1 knowledge-import -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle "<title>"` | `make knowledge-import KNOWLEDGE_SOURCE=<file> KNOWLEDGE_DOMAIN=<domain> KNOWLEDGE_TITLE="<title>"` | Backward-compatible alias |
 | `.\scripts\workspace.ps1 knowledge-push-dry-run -KbRepo "<url>"` | `make knowledge-push-dry-run KB_REPO=<url>` | Preview push (no changes) |
 | `.\scripts\workspace.ps1 knowledge-push -KbRepo "<url>"` | `make knowledge-push KB_REPO=<url>` | Push curated notes to external KB repo |
 

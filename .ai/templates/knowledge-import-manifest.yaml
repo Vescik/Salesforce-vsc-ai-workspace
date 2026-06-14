@@ -13,7 +13,17 @@ files:
     tags:
       - "example"
       - "managed-package"
+    usage_context:
+      - "Documentation"
+      - "Solution Design"
+    aliases: []
+    key_concepts: []
     related_objects: []
+    related_fields: []
     related_config_objects: []
+    related_metadata: []
     related_processes: []
+    integration_points: []
+    dependencies: []
+    business_rules: []
     enabled: false
