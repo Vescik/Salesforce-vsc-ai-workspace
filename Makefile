@@ -34,6 +34,9 @@ KNOWLEDGE_VALIDATE_FLAGS ?=
 FORCE_APP_ROOT ?= force-app
 METADATA_KNOWLEDGE_INDEX ?= .ai/context/index/metadata-knowledge-cards.jsonl
 METADATA_KNOWLEDGE_SUMMARY ?= .ai/context/index/metadata-knowledge-summary.json
+KNOWLEDGE_GRAPH ?= .ai/context/index/knowledge-graph.json
+KNOWLEDGE_INDEX_YAML ?= .ai/context/index/knowledge-index-files.yaml
+KNOWLEDGE_GRAPH_ADJACENCY_CAP ?= 200
 KNOWLEDGE_DOMAIN ?= general
 KNOWLEDGE_TITLE ?=
 KNOWLEDGE_OWNER ?= Salesforce Platform Team
@@ -49,7 +52,7 @@ WIKI_APPROVAL_NOTE ?=
 DOCS_ROOT ?= docs/workspace
 DOCS_HTML ?= $(DOCS_ROOT)/html/index.html
 
-.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-validate metadata-knowledge-index knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
+.PHONY: help setup setup-venv configure doctor doctor-strict first-run test smoke ai-index-repo ai-index-schema ai-index-config ai-index-all ai-context ai-context-example ai-clean-context clean-ai-generated ai-list-outputs ai-check-python config-impact config-pack-skeleton knowledge-sync knowledge-sync-dry-run knowledge-index knowledge-import knowledge-import-manifest knowledge-search knowledge-validate metadata-knowledge-index knowledge-graph knowledge-index-yaml knowledge-push-dry-run knowledge-push wiki-dry-run wiki-prepare-branch wiki-push-approved wiki-scan docs-build docs-export-pdf docs-pack docs-open-html wi-precheck wi-precheck-strict wi-scope-check mcp-salesforce-context mcp-smoke-test
 
 help:
 	@echo "Copilot-only Salesforce AI Workspace commands"
@@ -80,6 +83,7 @@ help:
 	@echo "  make knowledge-search QUERY=\"invoice approval\""
 	@echo "  make knowledge-validate"
 	@echo "  make metadata-knowledge-index"
+	@echo "  make knowledge-graph"
 	@echo "  make knowledge-push-dry-run KB_REPO=<git-url>"
 	@echo "  make knowledge-push KB_REPO=<git-url>"
 	@echo "  make wiki-dry-run WORK_ITEM=KIM-1234 WIKI_TITLE=\"Invoice Approval Routing\" WIKI_SOURCE=docs/architecture/KIM-1234.md AZURE_WIKI_REPO=<repo>"
@@ -277,6 +281,20 @@ metadata-knowledge-index:
 		--force-app-root "$(FORCE_APP_ROOT)" \
 		--out "$(METADATA_KNOWLEDGE_INDEX)" \
 		--summary-out "$(METADATA_KNOWLEDGE_SUMMARY)"
+
+knowledge-graph: knowledge-index-yaml metadata-knowledge-index
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.build_graph \
+		--knowledge-root "$(KNOWLEDGE_ROOT)" \
+		--index-dir "$(INDEX_DIR)" \
+		--work-items-dir ".ai/context/work-items" \
+		--out "$(KNOWLEDGE_GRAPH)" \
+		--adjacency-cap $(KNOWLEDGE_GRAPH_ADJACENCY_CAP)
+
+knowledge-index-yaml:
+	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.index_knowledge \
+		--knowledge-root "$(KNOWLEDGE_ROOT)" \
+		--out "$(KNOWLEDGE_INDEX)" \
+		--emit-index-yaml "$(KNOWLEDGE_INDEX_YAML)"
 
 knowledge-push-dry-run:
 	PYTHONPATH=$(PYTHONPATH_VALUE) $(PYTHON) -m ai_workspace.knowledge.push_knowledge \

@@ -81,6 +81,20 @@ class SalesforceContextServer:
                 str(arguments.get("work_item_id", "")),
                 str(arguments.get("query", "")),
             )
+        if name == "knowledge_search":
+            return self.knowledge_search(
+                str(arguments.get("query", "")),
+                str(arguments.get("domain") or "") or None,
+                str(arguments.get("related_object") or "") or None,
+                _int_arg(arguments, "k", 10),
+            )
+        if name == "knowledge_graph_neighbors":
+            return self.knowledge_graph_neighbors(
+                str(arguments.get("node_id", "")),
+                _int_arg(arguments, "depth", 1),
+            )
+        if name == "knowledge_get":
+            return self.knowledge_get(str(arguments.get("slug", "")))
         raise ValueError(f"Unknown tool: {name}")
 
     def search_context(self, query: str, top_k: int = 10) -> dict[str, Any]:
@@ -256,6 +270,130 @@ class SalesforceContextServer:
             "warnings": [f"No approved or proposed solution design found for {work_item_id}."],
         }
 
+    def knowledge_search(
+        self,
+        query: str,
+        domain: str | None,
+        related_object: str | None,
+        k: int,
+    ) -> dict[str, Any]:
+        """BM25-ranked search over the knowledge index with optional filters."""
+
+        if not query or not query.strip():
+            raise ValueError("query is required")
+        if domain is not None and not re.fullmatch(r"[A-Za-z0-9_-]+", domain):
+            raise ValueError("domain must contain only letters, digits, hyphens, and underscores")
+        if related_object is not None and not OBJECT_API_RE.fullmatch(related_object):
+            raise ValueError("related_object must be a Salesforce API name")
+        path = self._index_file(INDEX_FILES["knowledge"])
+        if not path.exists():
+            return {"query": query, "results": [], "warnings": [f"Missing knowledge index: {path.as_posix()}"]}
+        # Over-fetch then filter; BM25 over the full corpus + post-filter keeps relevance accurate.
+        raw = search_jsonl(str(path), query, max(k * 4, k), mode="bm25")
+        filtered: list[dict[str, Any]] = []
+        for record in raw:
+            if domain and str(record.get("domain") or "").lower() != domain.lower():
+                continue
+            if related_object:
+                related = [str(item) for item in (record.get("related_objects") or [])]
+                if related_object not in related:
+                    continue
+            filtered.append(_concise_record("knowledge", record))
+            if len(filtered) >= k:
+                break
+        return {
+            "query": query,
+            "domain": domain,
+            "related_object": related_object,
+            "results": filtered,
+            "warnings": [] if filtered else ["No matching knowledge records under the given filters."],
+        }
+
+    def knowledge_graph_neighbors(self, node_id: str, depth: int) -> dict[str, Any]:
+        """BFS through the knowledge graph from ``node_id`` up to ``depth`` (cap 3)."""
+
+        if not node_id or "\x00" in node_id:
+            raise ValueError("node_id is required")
+        if not re.fullmatch(r"[A-Za-z0-9_:.\\-]+", node_id):
+            raise ValueError("node_id contains unsupported characters")
+        depth = max(1, min(int(depth or 1), 3))
+        graph_path = self._index_file("knowledge-graph.json")
+        if not graph_path.exists():
+            return {"node_id": node_id, "warnings": [f"Missing knowledge graph: {graph_path.as_posix()}"]}
+        try:
+            graph = json.loads(graph_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            return {"node_id": node_id, "warnings": [f"Could not read graph: {exc}"]}
+        nodes_by_id = {str(n.get("id")): n for n in graph.get("nodes") or []}
+        if node_id not in nodes_by_id:
+            return {"node_id": node_id, "warnings": [f"Node not found in graph: {node_id}"]}
+        adjacency: dict[str, list[dict[str, str]]] = {}
+        for edge in graph.get("edges") or []:
+            adjacency.setdefault(str(edge.get("source")), []).append(dict(edge))
+            adjacency.setdefault(str(edge.get("target")), []).append({
+                "source": str(edge.get("target")),
+                "target": str(edge.get("source")),
+                "type": str(edge.get("type")) + "_inverse",
+            })
+
+        frontier = {node_id}
+        visited = {node_id}
+        collected_edges: list[dict[str, str]] = []
+        for _ in range(depth):
+            next_frontier: set[str] = set()
+            for current in frontier:
+                for edge in adjacency.get(current, []):
+                    collected_edges.append(edge)
+                    target = edge["target"]
+                    if target not in visited and target in nodes_by_id:
+                        visited.add(target)
+                        next_frontier.add(target)
+            frontier = next_frontier
+            if not frontier:
+                break
+
+        return {
+            "node_id": node_id,
+            "depth": depth,
+            "nodes": [nodes_by_id[n] for n in sorted(visited)],
+            "edges": collected_edges,
+            "warnings": [],
+        }
+
+    def knowledge_get(self, slug: str) -> dict[str, Any]:
+        """Resolve a knowledge note by slug via the index YAML and read its content."""
+
+        if not slug or "\x00" in slug:
+            raise ValueError("slug is required")
+        if not re.fullmatch(r"[A-Za-z0-9_.\\-]+", slug):
+            raise ValueError("slug contains unsupported characters")
+        path = self._resolve_slug(slug)
+        if path is None:
+            return {"slug": slug, "warnings": [f"Slug not found in index: {slug}"]}
+        return self.get_knowledge_note(path)
+
+    def _resolve_slug(self, slug: str) -> str | None:
+        index_yaml = self._index_file("knowledge-index-files.yaml")
+        if not index_yaml.exists():
+            return None
+        # The simple YAML loader does not support inline mappings in lists, which is
+        # the shape emitted by index_knowledge --emit-index-yaml. Parse with a
+        # targeted regex scan instead — the format is machine-generated and stable.
+        try:
+            text = index_yaml.read_text(encoding="utf-8")
+        except OSError:
+            return None
+        pattern = re.compile(r"^\s*-\s+slug:\s+\"([^\"]+)\"\s*$", re.MULTILINE)
+        path_pattern = re.compile(r"^\s+path:\s+\"([^\"]+)\"\s*$", re.MULTILINE)
+        for match in pattern.finditer(text):
+            if match.group(1) != slug:
+                continue
+            tail = text[match.end():]
+            path_match = path_pattern.search(tail.split("\n      - slug:")[0])
+            if path_match:
+                return path_match.group(1)
+        return None
+
     def get_config_impact(self, work_item_id: str) -> dict[str, Any]:
         self._validate_work_item(work_item_id)
         paths = [
@@ -389,6 +527,9 @@ def _tool_definitions() -> list[dict[str, Any]]:
         _tool("list_knowledge_domain", "List all knowledge cards indexed under a specific domain (e.g. 'billing', 'time-expense').", {"domain": "string", "limit": "integer"}, ["domain"]),
         _tool("rebuild_knowledge_index", "Rebuild the local knowledge card index from .ai/knowledge/ notes. Call this after importing or editing knowledge notes.", {}, []),
         _tool("build_context_pack", "Build a Work Item context pack by searching all local indexes. Writes context-pack.md and relevant-*.yaml under .ai/context/work-items/<id>/.", {"work_item_id": "string", "query": "string"}, ["work_item_id", "query"]),
+        _tool("knowledge_search", "BM25 search over local knowledge cards with optional domain and related_object filters.", {"query": "string", "domain": "string", "related_object": "string", "k": "integer"}, ["query"]),
+        _tool("knowledge_graph_neighbors", "BFS through the local knowledge graph (depth 1-3) from a node id like 'note:invoice-approval-process' or 'object:kmbi__Invoice__c'.", {"node_id": "string", "depth": "integer"}, ["node_id"]),
+        _tool("knowledge_get", "Resolve a knowledge note by slug via the local index and return its content.", {"slug": "string"}, ["slug"]),
     ]
 
 

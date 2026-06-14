@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import hashlib
 import json
 import os
 import re
@@ -193,6 +194,14 @@ def sync_knowledge_repo(
         removed_files = _clean_removed_files(knowledge_root, copied_files, dry_run=dry_run)
 
     synced_at = datetime.now(timezone.utc).isoformat()
+    per_file_state = _build_per_file_state(
+        copied_files=copied_files,
+        vendor_dir=vendor_dir,
+        knowledge_root=knowledge_root,
+        commit=commit,
+        synced_at=synced_at,
+        dry_run=dry_run,
+    )
     state = {
         "source_repo_url": _mask_repo_url(repo_url),
         "branch": branch,
@@ -204,6 +213,7 @@ def sync_knowledge_repo(
         "skipped_files": skipped_files,
         "warnings": warnings,
         "policy_path": _repo_relative(policy_path, repo_root),
+        "files": per_file_state,
     }
     if removed_files:
         state["removed_files"] = removed_files
@@ -299,6 +309,38 @@ def _skip_reason(
 
 def _matches_any(relative: str, patterns: list[str]) -> bool:
     return any(fnmatch.fnmatch(relative, pattern) for pattern in patterns)
+
+
+def _build_per_file_state(
+    copied_files: list[str],
+    vendor_dir: Path,
+    knowledge_root: Path,
+    commit: str,
+    synced_at: str,
+    dry_run: bool,
+) -> dict[str, dict[str, str]]:
+    """Compute per-file sync metadata so staleness can be detected granularly."""
+
+    result: dict[str, dict[str, str]] = {}
+    for relative in copied_files:
+        candidate = (knowledge_root / relative) if not dry_run else (vendor_dir / relative)
+        sha256 = _sha256(candidate)
+        if sha256 is None:
+            sha256 = _sha256(vendor_dir / relative) or ""
+        result[relative] = {
+            "commit": commit,
+            "synced_at": synced_at,
+            "sha256": sha256,
+        }
+    return result
+
+
+def _sha256(path: Path) -> str | None:
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return None
+    return hashlib.sha256(data).hexdigest()
 
 
 def _is_binary(path: Path) -> bool:

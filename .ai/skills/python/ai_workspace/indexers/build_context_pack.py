@@ -9,26 +9,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from ai_workspace.search.ranking import (
+    CONFIDENCE_RANK as _CONFIDENCE_RANK,
+    RISK_PENALTY as _RISK_PENALTY,
+    STATUS_RANK as _STATUS_RANK,
+    knowledge_quality_rank as _knowledge_quality_rank,
+)
 from ai_workspace.search.simple_search import score_record, search_jsonl, tokenize
-
-_STATUS_RANK: dict[str, int] = {"reviewed": 0, "approved": 0, "": 1, "draft": 2}
-_CONFIDENCE_RANK: dict[str, int] = {"high": 0, "medium": 1, "": 2, "low": 3}
-_RISK_PENALTY: dict[str, int] = {
-    "possible_secret": 10,
-    "missing_front_matter": 3,
-    "stale_review": 2,
-    "low_confidence": 1,
-    "draft_status": 1,
-    "missing_owner": 1,
-}
-
-
-def _knowledge_quality_rank(record: dict[str, Any]) -> float:
-    status = str(record.get("status") or "").lower()
-    confidence = str(record.get("confidence") or "").lower()
-    flags = record.get("risk_flags") if isinstance(record.get("risk_flags"), list) else []
-    penalty = sum(_RISK_PENALTY.get(str(f), 0) for f in flags)
-    return float(_STATUS_RANK.get(status, 1) * 10 + _CONFIDENCE_RANK.get(confidence, 2) + penalty)
 
 
 INDEX_FILES = {

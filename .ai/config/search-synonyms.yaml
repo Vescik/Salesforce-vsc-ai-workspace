@@ -1,0 +1,49 @@
+# Knowledge 2.0 search synonyms.
+#
+# Maps a canonical query term to one or more synonyms that should also
+# match. Lookup is case-insensitive; synonyms are emitted with the casing
+# below so API names survive BM25 tokenization. Keep entries terse — every
+# entry inflates the corpus tokenization cost.
+#
+# Phrase keys (containing a space) match against the lowercased query string;
+# single-token keys match per-token.
+#
+# Upstreamed to Vescik/Salesforce-knowledge-base per ADR-002 — edit there first.
+
+invoice:
+  - kmbi__Invoice__c
+  - billing
+
+billing:
+  - kmbi__Invoice__c
+  - billing schedule
+  - invoice
+
+timesheet:
+  - kmbi__TimeEntry__c
+  - time entry
+  - timecard
+
+"time entry":
+  - kmbi__TimeEntry__c
+  - timesheet
+
+resource:
+  - kmbi__Resource__c
+  - booking
+  - allocation
+
+booking:
+  - kmbi__Resource__c
+  - allocation
+  - resource
+
+approval:
+  - approval process
+  - approver
+  - finance lead
+
+devops:
+  - DevOps Center
+  - promotion
+  - work item
