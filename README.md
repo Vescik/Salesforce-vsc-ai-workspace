@@ -3,7 +3,7 @@
 > Local, deterministic AI assistance for Salesforce teams working on KimbleOne/Kantata — powered by GitHub Copilot, with no external LLM APIs.
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey)
+![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey)
 ![AI](https://img.shields.io/badge/AI-GitHub%20Copilot%20only-green)
 ![Salesforce](https://img.shields.io/badge/Salesforce-DevOps%20Center-blue)
 
@@ -32,16 +32,7 @@
 
 **2. Clone, install, and set up:**
 
-```powershell
-# Windows (PowerShell)
-git clone <repo-url>; cd <repo-folder>
-pip install -e .
-.\scripts\workspace.ps1 setup
-.\scripts\workspace.ps1 configure
-```
-
 ```bash
-# Mac / Linux
 git clone <repo-url> && cd <repo-folder>
 pip install -e .
 make setup
@@ -52,47 +43,41 @@ make configure
 > `configure` is interactive: sets your Salesforce org alias, Azure DevOps organization, and Knowledge Base URL.
 
 **3. Authenticate Salesforce:**
-```powershell
+```bash
 sf org login web --alias IntDev
 ```
 
 **4. Verify and index:**
-```powershell
-# Windows
-.\scripts\workspace.ps1 doctor
-.\scripts\workspace.ps1 ai-index-repo
-```
 ```bash
-# Mac / Linux
 make doctor
 make ai-index-repo
 ```
 
 **5. Open VS Code and start:**
-```powershell
+```bash
 code .
 ```
 Open Copilot Chat and type `/fetch-us YOUR-WORK-ITEM-ID` to begin.
 
-> **VS Code Tasks** (all platforms): `Ctrl+Shift+P` → `Tasks: Run Task` — all commands available as clickable tasks.
+> **VS Code Tasks**: `Ctrl+Shift+P` → `Tasks: Run Task` — all commands available as clickable tasks.
 
 ---
 
 ## Features
 
-| Feature | Windows (PowerShell) | Mac / Linux |
-|---|---|---|
-| Context indexing | `.\scripts\workspace.ps1 ai-index-repo` | `make ai-index-repo` |
-| Index all (schema + config) | `.\scripts\workspace.ps1 ai-index-all -Org IntDev` | `make ai-index-all ORG=IntDev` |
-| Build context pack | `.\scripts\workspace.ps1 ai-context -WorkItem <ID> -Query "<topic>"` | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` |
-| Knowledge Base sync | `.\scripts\workspace.ps1 knowledge-sync -KbRepo <url>` | `make knowledge-sync KB_REPO=<url>` |
-| Knowledge Base push | `.\scripts\workspace.ps1 knowledge-push -KbRepo <url>` | `make knowledge-push KB_REPO=<url>` |
-| KB search | `.\scripts\workspace.ps1 knowledge-search -Query "<topic>"` | `make knowledge-search QUERY="<topic>"` |
-| Pre-promote check | `.\scripts\workspace.ps1 wi-precheck -WorkItem <ID>` | `make wi-precheck WORK_ITEM=<ID>` |
-| Config impact | `.\scripts\workspace.ps1 config-impact -WorkItem <ID>` | `make config-impact WORK_ITEM=<ID>` |
-| Wiki draft | `.\scripts\workspace.ps1 wiki-dry-run -WorkItem <ID> ...` | `make wiki-dry-run WORK_ITEM=<ID> ...` |
-| MCP server | `.\scripts\workspace.ps1 mcp-salesforce-context` | `make mcp-salesforce-context` |
-| Run tests | `.\scripts\workspace.ps1 test` | `make test` |
+| Feature | Command |
+|---|---|
+| Context indexing | `make ai-index-repo` |
+| Index all (schema + config) | `make ai-index-all ORG=IntDev` |
+| Build context pack | `make ai-context WORK_ITEM=<ID> QUERY="<topic>"` |
+| Knowledge Base sync | `make knowledge-sync KB_REPO=<url>` |
+| Knowledge Base push | `make knowledge-push KB_REPO=<url>` |
+| KB search | `make knowledge-search QUERY="<topic>"` |
+| Pre-promote check | `make wi-precheck WORK_ITEM=<ID>` |
+| Config impact | `make config-impact WORK_ITEM=<ID>` |
+| Wiki draft | `make wiki-dry-run WORK_ITEM=<ID> ...` |
+| MCP server | `make mcp-salesforce-context` |
+| Run tests | `make test` |
 
 ---
 
@@ -160,11 +145,10 @@ Full prompt reference: [docs/workspace/USER-GUIDE.md — §9](docs/workspace/USE
 
 .vscode/
 ├── mcp.json         # MCP server configuration (auto-updated by configure)
-├── tasks.json       # VS Code tasks — all commands, Windows + Mac/Linux
+├── tasks.json       # VS Code tasks — all commands
 └── settings.json    # Workspace settings
 
 scripts/
-├── workspace.ps1    # Windows PowerShell: all commands (primary on Windows)
 ├── setup.py         # Python setup script
 ├── configure.py     # Python configure script
 └── doctor.py        # Python doctor script
@@ -176,8 +160,8 @@ config/data-promotion/
 docs/workspace/      # Workspace documentation
 force-app/           # Salesforce metadata (DX project)
 specs/               # Solution designs (proposed + approved)
-Makefile             # Command interface for Mac / Linux
-setup.py             # Enables pip install -e . on all platforms
+Makefile             # Command interface
+setup.py             # Enables pip install -e .
 ```
 
 ---
@@ -192,8 +176,6 @@ setup.py             # Enables pip install -e . on all platforms
 | VS Code | Latest | Editor + Copilot Chat integration |
 | GitHub Copilot | Active subscription | AI layer (only approved AI) |
 | Azure DevOps | Read access | Work Item retrieval via MCP |
-
-> **Windows note:** `make` is not required. Use `.\scripts\workspace.ps1 <command>` or VS Code Tasks instead.
 
 ---
 

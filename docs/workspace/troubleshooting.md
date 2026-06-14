@@ -22,20 +22,9 @@ Check:
 
 ```bash
 python3 --version
-python3.11 --version
 ```
 
 If imports fail, run through Makefile so `PYTHONPATH=.ai/skills/python` is set.
-
-## Make Unavailable
-
-On Windows or minimal environments, use direct Python scripts:
-
-```powershell
-python scripts/setup.py
-python scripts/configure.py
-python scripts/doctor.py
-```
 
 ## Salesforce CLI Missing
 
@@ -173,10 +162,6 @@ make ai-check-python
 make test
 make wi-precheck WORK_ITEM=<WORK_ITEM> BASE_REF=origin/main
 ```
-
-## Windows Path Issues
-
-Prefer PowerShell scripts for setup/doctor. Keep repo paths short and avoid moving the workspace while VS Code tasks are running.
 
 ## Unexpected Generated Files
 
