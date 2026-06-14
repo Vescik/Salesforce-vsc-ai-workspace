@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Create or update local AI Workspace configuration."""
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Thin wrapper for AI Workspace setup."""
 
 from __future__ import annotations

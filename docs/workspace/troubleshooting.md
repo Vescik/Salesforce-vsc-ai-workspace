@@ -4,14 +4,14 @@
 
 Run:
 
-```bash
-make doctor
+```powershell
+.\scripts\workspace.ps1 doctor
 ```
 
 If setup folders are missing:
 
-```bash
-make setup
+```powershell
+.\scripts\workspace.ps1 setup
 ```
 
 ## Python Version
@@ -20,28 +20,17 @@ The workspace expects Python 3.11+.
 
 Check:
 
-```bash
-python3 --version
-python3.11 --version
-```
-
-If imports fail, run through Makefile so `PYTHONPATH=.ai/skills/python` is set.
-
-## Make Unavailable
-
-On Windows or minimal environments, use direct Python scripts:
-
 ```powershell
-python scripts/setup.py
-python scripts/configure.py
-python scripts/doctor.py
+python --version
 ```
+
+If imports fail, run `pip install -e .` once so PYTHONPATH is not required, or invoke through `.\scripts\workspace.ps1` which sets `PYTHONPATH=.ai/skills/python`.
 
 ## Salesforce CLI Missing
 
 Check:
 
-```bash
+```powershell
 sf --version
 ```
 
@@ -51,14 +40,14 @@ Install Salesforce CLI and restart the terminal. Commands such as `ai-index-sche
 
 Authenticate:
 
-```bash
+```powershell
 sf org login web --alias IntDev
 ```
 
 Doctor strict can check auth:
 
-```bash
-make doctor-strict
+```powershell
+.\scripts\workspace.ps1 doctor-strict
 ```
 
 ## Knowledge Base Repo Access
@@ -71,9 +60,9 @@ Symptoms:
 
 Checks:
 
-```bash
+```powershell
 git ls-remote <kb-repo-url>
-make knowledge-sync-dry-run KB_REPO=<kb-repo-url> KB_BRANCH=main
+.\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo <kb-repo-url> -KbBranch main
 ```
 
 Fixes:
@@ -93,9 +82,9 @@ Symptoms:
 
 Checks:
 
-```bash
+```powershell
 git ls-remote <wiki-repo-url>
-make wiki-dry-run WORK_ITEM=KIM-1234 WIKI_TITLE="Test" WIKI_SOURCE=docs/architecture/README.md AZURE_WIKI_REPO=<wiki-repo-url>
+.\scripts\workspace.ps1 wiki-dry-run -WorkItem KIM-1234 -WikiTitle "Test" -WikiSource docs/architecture/README.md -AzureWikiRepo <wiki-repo-url>
 ```
 
 Push requires explicit approval note and local push enablement.
@@ -106,8 +95,8 @@ Check `.vscode/mcp.json`.
 
 For local context MCP:
 
-```bash
-make mcp-smoke-test
+```powershell
+.\scripts\workspace.ps1 mcp-smoke-test
 ```
 
 Common causes:
@@ -125,8 +114,8 @@ Run terminal commands from the repository root. If VS Code uses a different shel
 
 Run:
 
-```bash
-make docs-export-pdf
+```powershell
+.\scripts\workspace.ps1 docs-export-pdf
 ```
 
 If no local PDF tool is found, follow `docs/workspace/pdf/README.md`.
@@ -135,9 +124,9 @@ If no local PDF tool is found, follow `docs/workspace/pdf/README.md`.
 
 Run:
 
-```bash
-make knowledge-index
-make ai-context WORK_ITEM=<WORK_ITEM> QUERY="<topic>"
+```powershell
+.\scripts\workspace.ps1 knowledge-index
+.\scripts\workspace.ps1 ai-context -WorkItem <WORK_ITEM> -Query "<topic>"
 ```
 
 Check that `.ai/context/index/knowledge-cards.jsonl` exists and that KB notes have matching keywords.
@@ -168,15 +157,15 @@ Common causes:
 
 Run locally:
 
-```bash
-make ai-check-python
-make test
-make wi-precheck WORK_ITEM=<WORK_ITEM> BASE_REF=origin/main
+```powershell
+.\scripts\workspace.ps1 ai-check-python
+.\scripts\workspace.ps1 test
+.\scripts\workspace.ps1 wi-precheck -WorkItem <WORK_ITEM> -BaseRef origin/main
 ```
 
 ## Windows Path Issues
 
-Prefer PowerShell scripts for setup/doctor. Keep repo paths short and avoid moving the workspace while VS Code tasks are running.
+Keep repo paths short and avoid moving the workspace while VS Code tasks are running.
 
 ## Unexpected Generated Files
 
