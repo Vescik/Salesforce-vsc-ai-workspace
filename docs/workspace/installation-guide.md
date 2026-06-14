@@ -199,4 +199,4 @@ Tasks invoke `scripts/workspace.ps1` so behavior is consistent between terminal 
 - Do not store Salesforce, Azure DevOps, GitHub, or Knowledge Base credentials in repository files.
 - DevOps Center remains the official metadata promotion mechanism.
 - This workspace does not deploy, apply config records, or write Salesforce data.
-- GitHub Copilot/Codex-style tooling is the approved AI layer; external model APIs are not part of this workspace.
+- GitHub Copilot is the approved AI layer; external model APIs are not part of this workspace.

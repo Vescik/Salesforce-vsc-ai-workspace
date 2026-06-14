@@ -108,7 +108,7 @@ Common causes:
 
 ## VS Code Tasks Cannot Find Python
 
-Run terminal commands from the repository root. If VS Code uses a different shell, configure the workspace terminal or run Makefile targets manually.
+Run terminal commands from the repository root. If VS Code uses a different shell, configure the workspace terminal or run `.\scripts\workspace.ps1` targets manually.
 
 ## PDF Export Not Available
 

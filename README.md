@@ -70,9 +70,14 @@ Open Copilot Chat and type `/fetch-us YOUR-WORK-ITEM-ID` to begin.
 | Context indexing | `.\scripts\workspace.ps1 ai-index-repo` |
 | Index all (schema + config) | `.\scripts\workspace.ps1 ai-index-all -Org IntDev` |
 | Build context pack | `.\scripts\workspace.ps1 ai-context -WorkItem <ID> -Query "<topic>"` |
+| Build context from AC keywords | `.\scripts\workspace.ps1 ai-context-auto -WorkItem <ID>` |
 | Knowledge Base sync | `.\scripts\workspace.ps1 knowledge-sync -KbRepo <url>` |
+| Knowledge Base validation | `.\scripts\workspace.ps1 knowledge-validate` |
+| Knowledge graph | `.\scripts\workspace.ps1 knowledge-graph` |
 | Knowledge Base push | `.\scripts\workspace.ps1 knowledge-push -KbRepo <url>` |
 | KB search | `.\scripts\workspace.ps1 knowledge-search -Query "<topic>"` |
+| AC coverage check | `.\scripts\workspace.ps1 ac-coverage -WorkItem <ID>` |
+| Solution design lint | `.\scripts\workspace.ps1 design-lint -WorkItem <ID>` |
 | Pre-promote check | `.\scripts\workspace.ps1 wi-precheck -WorkItem <ID>` |
 | Config impact | `.\scripts\workspace.ps1 config-impact -WorkItem <ID>` |
 | Wiki draft | `.\scripts\workspace.ps1 wiki-dry-run -WorkItem <ID> ...` |

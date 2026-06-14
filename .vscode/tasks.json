@@ -110,9 +110,27 @@
       "problemMatcher": []
     },
     {
+      "label": "AI: Build Context Pack From AC",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 ai-context-auto -WorkItem ${input:workItemId}",
+      "problemMatcher": []
+    },
+    {
       "label": "AI: Build Example Context Pack",
       "type": "shell",
       "command": ".\\scripts\\workspace.ps1 ai-context-example",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Check AC Coverage",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 ac-coverage -WorkItem ${input:workItemId}",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Lint Solution Design",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 design-lint -WorkItem ${input:workItemId}",
       "problemMatcher": []
     },
     {
@@ -185,6 +203,30 @@
       "label": "AI: Import Knowledge Manifest",
       "type": "shell",
       "command": ".\\scripts\\workspace.ps1 knowledge-import-manifest -KnowledgeManifest \"${input:knowledgeManifest}\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Validate Knowledge Base",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 knowledge-validate",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Index Metadata Knowledge",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 metadata-knowledge-index",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Emit Knowledge YAML Index",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 knowledge-index-yaml",
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Build Knowledge Graph",
+      "type": "shell",
+      "command": ".\\scripts\\workspace.ps1 knowledge-graph",
       "problemMatcher": []
     },
     {

@@ -95,11 +95,11 @@ def main(argv: list[str] | None = None) -> int:
     print("Next steps:")
     alias = config["salesforce"]["default_dev_org_alias"] or "IntDev"
     print(f"- sf org login web --alias {alias}")
-    print("- make doctor")
-    print("- make ai-index-repo")
+    print("- .\\scripts\\workspace.ps1 doctor")
+    print("- .\\scripts\\workspace.ps1 ai-index-repo")
     if config["knowledge_base"]["enabled"]:
-        print(f"- make knowledge-sync KB_REPO={mask_sensitive(config['knowledge_base']['repo_url'])}")
-        print("- make knowledge-index")
+        print(f"- .\\scripts\\workspace.ps1 knowledge-sync -KbRepo {mask_sensitive(config['knowledge_base']['repo_url'])}")
+        print("- .\\scripts\\workspace.ps1 knowledge-index")
     if config.get("azure_devops", {}).get("enabled"):
         print("- Start VS Code MCP server `ado-remote-mcp`, then run /fetch-us <WORK_ITEM_ID>")
     return 0

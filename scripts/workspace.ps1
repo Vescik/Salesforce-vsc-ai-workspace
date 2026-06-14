@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Windows PowerShell equivalent of the Salesforce AI Workspace Makefile.
+    Windows PowerShell command surface for the Salesforce AI Workspace.
 .DESCRIPTION
     Run all workspace commands on Windows without requiring GNU make.
     Usage: .\scripts\workspace.ps1 <target> [parameters]
@@ -44,6 +44,17 @@ param(
     [string]$KnowledgeIndex       = ".ai/context/index/knowledge-cards.jsonl",
     [string]$KnowledgeSource      = "",
     [string]$KnowledgeManifest    = ".ai/templates/knowledge-import-manifest.yaml",
+    [string]$KnowledgeSchema      = ".ai/templates/schemas/knowledge-note.schema.json",
+    [string]$KnowledgeValidationJson = ".ai/outputs/knowledge-import/validation-report.json",
+    [string]$KnowledgeValidationMd = ".ai/outputs/knowledge-import/validation-report.md",
+    [int]$KnowledgeMaxAgeDays     = 180,
+    [string]$KnowledgeValidateFlags = "",
+    [string]$ForceAppRoot         = "force-app",
+    [string]$MetadataKnowledgeIndex = ".ai/context/index/metadata-knowledge-cards.jsonl",
+    [string]$MetadataKnowledgeSummary = ".ai/context/index/metadata-knowledge-summary.json",
+    [string]$KnowledgeGraph       = ".ai/context/index/knowledge-graph.json",
+    [string]$KnowledgeIndexYaml   = ".ai/context/index/knowledge-index-files.yaml",
+    [int]$KnowledgeGraphAdjacencyCap = 200,
     [string]$KnowledgeDomain      = "general",
     [string]$KnowledgeTitle       = "",
     [string]$KnowledgeOwner       = "Salesforce Platform Team",
@@ -72,7 +83,7 @@ function Find-Python {
 $script:PythonCmd      = Find-Python
 $script:PythonPathVal  = ".ai/skills/python"
 
-# Computed defaults (mirror Makefile dynamic vars)
+# Computed defaults
 if (-not $WorkItemDir)  { $WorkItemDir  = ".ai/context/work-items/$WorkItem" }
 if (-not $ConfigPackDir){ $ConfigPackDir = "config/kimbleone-packs/$WorkItem" }
 $DocsHtml = "$DocsRoot/html/index.html"
@@ -116,7 +127,10 @@ function Invoke-Help {
     Write-Host "  ai-index-config              -Org IntDev"
     Write-Host "  ai-index-all                 -Org IntDev"
     Write-Host "  ai-context                   -WorkItem KIM-1234 -Query 'invoice approval'"
+    Write-Host "  ai-context-auto              -WorkItem KIM-1234"
     Write-Host "  ai-context-example"
+    Write-Host "  ac-coverage                  -WorkItem KIM-1234"
+    Write-Host "  design-lint                  -WorkItem KIM-1234"
     Write-Host "  ai-clean-context"
     Write-Host "  clean-ai-generated"
     Write-Host "  ai-list-outputs              -WorkItem KIM-1234"
@@ -128,6 +142,10 @@ function Invoke-Help {
     Write-Host "  knowledge-import             -KnowledgeSource <file> -KnowledgeDomain <domain> -KnowledgeTitle <title>"
     Write-Host "  knowledge-import-manifest    -KnowledgeManifest <yaml>"
     Write-Host "  knowledge-search             -Query 'invoice approval'"
+    Write-Host "  knowledge-validate"
+    Write-Host "  metadata-knowledge-index"
+    Write-Host "  knowledge-graph"
+    Write-Host "  knowledge-index-yaml"
     Write-Host "  knowledge-push-dry-run       -KbRepo <git-url>"
     Write-Host "  knowledge-push               -KbRepo <git-url>"
     Write-Host "  wiki-dry-run                 -WorkItem KIM-1234 -WikiTitle '...' -WikiSource docs/... -AzureWikiRepo <url>"
@@ -273,6 +291,42 @@ function Invoke-AiContextExample {
     Invoke-AiContext
 }
 
+function Invoke-AiContextAuto {
+    $env:PYTHONPATH = $script:PythonPathVal
+    $output = & $script:PythonCmd -m ai_workspace.knowledge.extract_ac_keywords `
+        --work-item $WorkItem `
+        --work-item-dir $WorkItemDir `
+        --top 12 `
+        --print
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $lines = @($output) | Where-Object { $_ -and ($_ -notmatch "^WARNING:") }
+    $acQuery = ($lines -join " ").Trim()
+    if ($acQuery) {
+        Write-Host "Auto-extracted AC keywords: $acQuery"
+        $script:Query = $acQuery
+    } else {
+        Write-Warning "No AC keywords extracted; using -Query '$Query'."
+    }
+    Invoke-AiContext
+}
+
+function Invoke-AcCoverage {
+    Invoke-Py @(
+        "-m", "ai_workspace.deployment.ac_coverage_check",
+        "--work-item", $WorkItem,
+        "--work-item-dir", $WorkItemDir,
+        "--print-summary"
+    )
+}
+
+function Invoke-DesignLint {
+    Invoke-Py @(
+        "-m", "ai_workspace.deployment.design_lint",
+        "--work-item", $WorkItem,
+        "--work-item-dir", $WorkItemDir
+    )
+}
+
 function Invoke-AiCleanContext {
     $patterns = @(
         ".ai/context/index/*.jsonl",
@@ -315,6 +369,9 @@ function Invoke-AiCheckPython {
         "ai_workspace.indexers.index_org_schema",
         "ai_workspace.indexers.index_config_records",
         "ai_workspace.indexers.build_context_pack",
+        "ai_workspace.knowledge.extract_ac_keywords",
+        "ai_workspace.deployment.ac_coverage_check",
+        "ai_workspace.deployment.design_lint",
         "ai_workspace.deployment.precheck_work_item",
         "ai_workspace.config.config_impact",
         "ai_workspace.config.config_pack_builder",
@@ -323,6 +380,9 @@ function Invoke-AiCheckPython {
         "ai_workspace.knowledge.sync_knowledge_repo",
         "ai_workspace.knowledge.index_knowledge",
         "ai_workspace.knowledge.knowledge_search",
+        "ai_workspace.knowledge.validate_knowledge",
+        "ai_workspace.knowledge.metadata_to_knowledge",
+        "ai_workspace.knowledge.build_graph",
         "ai_workspace.wiki.wiki_config",
         "ai_workspace.wiki.wiki_git",
         "ai_workspace.wiki.wiki_scanner",
@@ -419,6 +479,52 @@ function Invoke-KnowledgeSearch {
         "--query", $Query,
         "--index", $KnowledgeIndex,
         "--top-k", "10"
+    )
+}
+
+function Invoke-KnowledgeValidate {
+    $args = @(
+        "-m", "ai_workspace.knowledge.validate_knowledge",
+        "--knowledge-root", $KnowledgeRoot,
+        "--schema", $KnowledgeSchema,
+        "--max-age-days", [string]$KnowledgeMaxAgeDays,
+        "--json-out", $KnowledgeValidationJson,
+        "--md-out", $KnowledgeValidationMd
+    )
+    if ($KnowledgeValidateFlags) {
+        $args += $KnowledgeValidateFlags -split "\s+"
+    }
+    Invoke-Py $args
+}
+
+function Invoke-MetadataKnowledgeIndex {
+    Invoke-Py @(
+        "-m", "ai_workspace.knowledge.metadata_to_knowledge",
+        "--force-app-root", $ForceAppRoot,
+        "--out", $MetadataKnowledgeIndex,
+        "--summary-out", $MetadataKnowledgeSummary
+    )
+}
+
+function Invoke-KnowledgeIndexYaml {
+    Invoke-Py @(
+        "-m", "ai_workspace.knowledge.index_knowledge",
+        "--knowledge-root", $KnowledgeRoot,
+        "--out", $KnowledgeIndex,
+        "--emit-index-yaml", $KnowledgeIndexYaml
+    )
+}
+
+function Invoke-KnowledgeGraph {
+    Invoke-KnowledgeIndexYaml
+    Invoke-MetadataKnowledgeIndex
+    Invoke-Py @(
+        "-m", "ai_workspace.knowledge.build_graph",
+        "--knowledge-root", $KnowledgeRoot,
+        "--index-dir", $IndexDir,
+        "--work-items-dir", ".ai/context/work-items",
+        "--out", $KnowledgeGraph,
+        "--adjacency-cap", [string]$KnowledgeGraphAdjacencyCap
     )
 }
 
@@ -590,7 +696,10 @@ switch ($Target) {
     "ai-index-config"         { Invoke-AiIndexConfig }
     "ai-index-all"            { Invoke-AiIndexAll }
     "ai-context"              { Invoke-AiContext }
+    "ai-context-auto"         { Invoke-AiContextAuto }
     "ai-context-example"      { Invoke-AiContextExample }
+    "ac-coverage"             { Invoke-AcCoverage }
+    "design-lint"             { Invoke-DesignLint }
     "ai-clean-context"        { Invoke-AiCleanContext }
     "clean-ai-generated"      { Invoke-CleanAiGenerated }
     "ai-list-outputs"         { Invoke-AiListOutputs }
@@ -602,6 +711,10 @@ switch ($Target) {
     "knowledge-import"        { Invoke-KnowledgeImport }
     "knowledge-import-manifest" { Invoke-KnowledgeImportManifest }
     "knowledge-search"        { Invoke-KnowledgeSearch }
+    "knowledge-validate"      { Invoke-KnowledgeValidate }
+    "metadata-knowledge-index" { Invoke-MetadataKnowledgeIndex }
+    "knowledge-graph"         { Invoke-KnowledgeGraph }
+    "knowledge-index-yaml"    { Invoke-KnowledgeIndexYaml }
     "knowledge-push-dry-run"  { Invoke-KnowledgePushDryRun }
     "knowledge-push"          { Invoke-KnowledgePush }
     "wiki-dry-run"            { Invoke-WikiDryRun }
