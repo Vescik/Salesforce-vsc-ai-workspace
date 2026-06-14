@@ -27,7 +27,7 @@ This reference inventories files detected in this repository. Items marked plann
 | `/create-how-to-test` | `.github/prompts/create-how-to-test.prompt.md` | Draft QA how-to-test. | ACs, design, context, config impact. | QA doc. | Draft/file-writing | Do not invent data. |
 | `/design-to-work-packets` | `.github/prompts/design-to-work-packets.prompt.md` | Convert design into work packets. | Approved design and ACs. | Work packet YAML/docs. | Draft/file-writing | Keep scoped to Work Item. |
 | `/fetch-us` | `.github/prompts/fetch-us.prompt.md` | Fetch/normalize ADO Work Item context. | Work Item ID or pasted content. | Local Work Item summary and ACs. | File-writing | Read-only ADO MCP only; no ADO writes. |
-| `/import-knowledge` | `.github/prompts/import-knowledge.prompt.md` | Import controlled knowledge note. | Source, domain, title, owner. | Draft KB note. | File-writing | No raw dumps or secrets. |
+| `/import-knowledge` | `.github/prompts/import-knowledge.prompt.md` | Create draft KB notes from controlled source. | Source, domain, title, owner. | Draft KB note(s), validation/index steps. | File-writing | No raw dumps or secrets. |
 | `/pre-promote-report` | `.github/prompts/pre-promote-report.prompt.md` | Draft pre-promote report. | Precheck, QA, config, docs. | Report draft. | Draft/file-writing | DevOps Center remains promotion tool. |
 | `/prepare-wiki-page` | `.github/prompts/prepare-wiki-page.prompt.md` | Prepare Azure Wiki draft. | Work Item, title, source doc, wiki repo. | Wiki draft preview/branch. | File-writing via local tools | Human approval required. |
 | `/release-readiness-review` | `.github/prompts/release-readiness-review.prompt.md` | Review release readiness. | Precheck, validation, QA, config. | Readiness review. | Draft-only | No auto-approval. |
@@ -58,9 +58,13 @@ This reference inventories files detected in this repository. Items marked plann
 | `ai_workspace.deployment.precheck_work_item` | `make wi-precheck` | Local Work Item precheck. | Git diff and artifacts. | precheck reports. | No | No | No |
 | `ai_workspace.deployment.validate_metadata_scope` | Included in precheck | Validate scope artifacts. | Metadata scope files. | Findings. | No | No | No |
 | `ai_workspace.knowledge.sync_knowledge_repo` | `make knowledge-sync` | Sync external KB repo. | Git repo. | `.ai/knowledge/`, vendor clone. | No | Git | No |
-| `ai_workspace.knowledge.index_knowledge` | `make knowledge-index` | Index curated KB notes. | `.ai/knowledge/`. | `knowledge-cards.jsonl`. | No | No | No |
-| `ai_workspace.knowledge.import_knowledge` | `make knowledge-import` | Convert controlled source into KB note. | Local source/manifest. | KB note/report. | No | No | No |
-| `ai_workspace.knowledge.knowledge_search` | `make knowledge-search` | Search knowledge cards. | KB index. | Console output. | No | No | No |
+| `ai_workspace.knowledge.create_knowledge` | `make knowledge-create` | Convert controlled source into structured draft KB note(s). | PDF/CSV/MD/TXT/XML source or manifest. | KB notes/report. | No | No | No |
+| `ai_workspace.knowledge.import_knowledge` | `make knowledge-import` | Backward-compatible alias implementation for KB creation. | Local source/manifest. | KB note/report. | No | No | No |
+| `ai_workspace.knowledge.validate_knowledge` | `make knowledge-validate` | Validate KB schema, quality, freshness, secrets, and Salesforce ID rules. | `.ai/knowledge/`, schema. | validation reports. | No | No | No |
+| `ai_workspace.knowledge.index_knowledge` | `make knowledge-index`, `make knowledge-index-yaml` | Index curated KB notes and optional per-file YAML. | `.ai/knowledge/`. | `knowledge-cards.jsonl`, YAML index. | No | No | No |
+| `ai_workspace.knowledge.metadata_to_knowledge` | `make metadata-knowledge-index` | Build local metadata-derived knowledge cards. | `force-app/`. | metadata knowledge index. | No | No | No |
+| `ai_workspace.knowledge.build_graph` | `make knowledge-graph` | Build semantic graph across notes, source files, objects, fields, metadata, processes, business rules, and Work Items. | local indexes. | `knowledge-graph.json`. | No | No | No |
+| `ai_workspace.knowledge.knowledge_search` | `make knowledge-search` | BM25 search over knowledge cards with semantic filters. | KB index. | Console output. | No | No | No |
 | `ai_workspace.mcp.salesforce_context_mcp` | `make mcp-salesforce-context` | Read-only context MCP. | `.ai/context`. | JSON-RPC responses. | No | Local stdio | No |
 | `ai_workspace.wiki.wiki_publisher` | `make wiki-dry-run`, `make wiki-prepare-branch`, `make wiki-push-approved` | Prepare Azure Wiki draft branch. | Docs and wiki repo. | previews/branch. | No | Git | Push only when explicitly approved |
 | `ai_workspace.wiki.wiki_scanner` | `make wiki-scan` | Scan wiki clone. | local wiki clone. | wiki index JSON. | No | No | No |
@@ -86,7 +90,7 @@ Salesforce CLI is used by local tools for schema/config reads and optional valid
 ## Planned Or Optional, Not Fully Implemented Here
 
 - Read-only ADO Work Item retrieval depends on VS Code MCP configuration and user auth.
-- Metadata dependency graph generation is planned, not detected as an implemented Make target.
+- Metadata and knowledge graph generation is implemented through `make metadata-knowledge-index` and `make knowledge-graph`.
 - Config external key validator and config delta dry-run Make targets are planned; only `config_diff.py` is present without a Make target.
 - Automated wiki PR creation is not implemented.
 - Production config apply is not implemented.

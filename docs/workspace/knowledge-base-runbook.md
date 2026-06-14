@@ -50,6 +50,56 @@ Sync:
 make knowledge-sync KB_REPO=<repo-url-or-local-path>
 ```
 
+## Knowledge Base Creator 2.0 Flow
+
+Use `knowledge-create` for controlled source files staged under `.ai/knowledge/imports/`. Supported source types include PDF, CSV, Markdown, TXT, XML, and Salesforce metadata XML. The creator extracts text and structure locally, redacts likely sensitive values, splits large sources into logical notes, and generates draft/low-confidence Markdown with source references, semantic fields, search terms, and review actions.
+
+Create from one file:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-create -KnowledgeSource ".ai/knowledge/imports/example.txt" -KnowledgeDomain "general" -KnowledgeTitle "Example Knowledge Note"
+```
+```bash
+# Mac / Linux
+make knowledge-create KNOWLEDGE_SOURCE=.ai/knowledge/imports/example.txt KNOWLEDGE_DOMAIN=general KNOWLEDGE_TITLE="Example Knowledge Note"
+```
+
+Preview without writing notes:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-create-dry-run -KnowledgeSource ".ai/knowledge/imports/example.txt" -KnowledgeDomain "general" -KnowledgeTitle "Example Knowledge Note"
+```
+```bash
+# Mac / Linux
+make knowledge-create-dry-run KNOWLEDGE_SOURCE=.ai/knowledge/imports/example.txt KNOWLEDGE_DOMAIN=general KNOWLEDGE_TITLE="Example Knowledge Note"
+```
+
+Create from a manifest:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-create-manifest -KnowledgeManifest ".ai/templates/knowledge-import-manifest.yaml"
+```
+```bash
+# Mac / Linux
+make knowledge-create-manifest KNOWLEDGE_MANIFEST=.ai/templates/knowledge-import-manifest.yaml
+```
+
+`knowledge-import` and `knowledge-import-manifest` remain backward-compatible aliases.
+
+Validate:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-validate
+```
+```bash
+# Mac / Linux
+make knowledge-validate
+```
+
 Index:
 
 ```powershell
@@ -61,6 +111,17 @@ Index:
 make knowledge-index
 ```
 
+Build semantic graph:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-graph
+```
+```bash
+# Mac / Linux
+make knowledge-graph
+```
+
 Search:
 
 ```powershell
@@ -70,6 +131,17 @@ Search:
 ```bash
 # Mac / Linux
 make knowledge-search QUERY="invoice approval"
+```
+
+Filtered search examples:
+
+```powershell
+# Windows (PowerShell)
+.\scripts\workspace.ps1 knowledge-search -Query "approval status" -KnowledgeSearchFlags "--object Invoice__c --field Status__c --usage-context 'Solution Design'"
+```
+```bash
+# Mac / Linux
+make knowledge-search QUERY="approval status" KNOWLEDGE_SEARCH_FLAGS="--object Invoice__c --field Status__c --usage-context 'Solution Design'"
 ```
 
 ## Folder Structure
@@ -97,6 +169,10 @@ Each approved note should include:
 - last_reviewed
 - source
 - evidence or owner validation
+- purpose
+- source_format and source_checksum when generated
+- usage_context, tags, aliases, key_concepts, and keywords
+- related Salesforce objects, fields, metadata, processes, integrations, dependencies, and business rules when detected
 
 Use the template in `.ai/templates/knowledge-note.md`.
 
@@ -109,7 +185,7 @@ Use the template in `.ai/templates/knowledge-note.md`.
 
 ## How Context Packs Use Knowledge
 
-`make knowledge-index` turns curated Markdown notes into `knowledge-cards.jsonl`. `make ai-context` searches those cards and includes relevant excerpts under the Work Item context pack.
+`make knowledge-index` turns curated Markdown notes into `knowledge-cards.jsonl`. `make knowledge-graph` builds local relationships between notes, source files, metadata components, objects, fields, processes, business rules, and Work Items. `make ai-context` searches those cards and includes relevant excerpts under the Work Item context pack.
 
 Knowledge is included as supporting evidence. Prompts should still require acceptance criteria and source artifacts.
 

@@ -17,7 +17,22 @@ from ai_workspace.utils.io import ensure_parent_dir, write_jsonl
 
 EXCERPT_CHARS = 2000
 SKIP_DIRS = {"archive", "imports"}
-LIST_KEYS = {"applies_to", "related_objects", "related_config_objects", "related_processes", "keywords"}
+LIST_KEYS = {
+    "applies_to",
+    "usage_context",
+    "tags",
+    "aliases",
+    "key_concepts",
+    "related_objects",
+    "related_fields",
+    "related_config_objects",
+    "related_metadata",
+    "related_processes",
+    "integration_points",
+    "dependencies",
+    "business_rules",
+    "keywords",
+}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -107,17 +122,30 @@ def parse_knowledge_note(path: Path, knowledge_root: Path, max_excerpt_chars: in
         "path": relative_path,
         "source_type": str(metadata.get("source_type") or ""),
         "source_file": str(metadata.get("source_file") or ""),
+        "source_format": str(metadata.get("source_format") or ""),
+        "source_checksum": str(metadata.get("source_checksum") or ""),
+        "purpose": str(metadata.get("purpose") or ""),
         "owner": str(metadata.get("owner") or ""),
         "status": str(metadata.get("status") or ""),
         "confidence": str(metadata.get("confidence") or ""),
         "last_reviewed": str(metadata.get("last_reviewed") or ""),
         "applies_to": _list_value(metadata.get("applies_to")),
+        "usage_context": _list_value(metadata.get("usage_context")),
+        "tags": _list_value(metadata.get("tags")),
+        "aliases": _list_value(metadata.get("aliases")),
+        "key_concepts": _list_value(metadata.get("key_concepts")),
         "keywords": _list_value(metadata.get("keywords")),
         "related_objects": _list_value(metadata.get("related_objects")),
+        "related_fields": _list_value(metadata.get("related_fields")),
         "related_config_objects": _list_value(metadata.get("related_config_objects")),
+        "related_metadata": _list_value(metadata.get("related_metadata")),
         "related_processes": _list_value(metadata.get("related_processes")),
+        "integration_points": _list_value(metadata.get("integration_points")),
+        "dependencies": _list_value(metadata.get("dependencies")),
+        "business_rules": _list_value(metadata.get("business_rules")),
         "headings": headings,
         "summary": summary,
+        "weighted_terms": _weighted_terms(metadata, body),
         "content_excerpt": _section_aware_excerpt(body, max_excerpt_chars),
         "checksum": hashlib.sha256(normalize_whitespace(text).encode("utf-8")).hexdigest(),
         "risk_flags": _risk_flags(metadata, body, has_front_matter),
@@ -172,7 +200,74 @@ def _risk_flags(metadata: dict[str, Any], body: str, has_front_matter: bool) -> 
         flags.add("stale_review")
     if detect_sensitive_content(body):
         flags.add("possible_secret")
+    if _looks_v2(metadata):
+        if not str(metadata.get("purpose") or "").strip():
+            flags.add("missing_purpose")
+        if not _list_value(metadata.get("keywords")):
+            flags.add("missing_keywords")
+        if not str(metadata.get("source_file") or "").strip():
+            flags.add("missing_source_file")
+        semantic_values = []
+        for key in ("key_concepts", "related_objects", "related_fields", "related_metadata", "business_rules"):
+            semantic_values.extend(_list_value(metadata.get(key)))
+        if not semantic_values:
+            flags.add("missing_semantic_fields")
     return sorted(flags)
+
+
+def _looks_v2(metadata: dict[str, Any]) -> bool:
+    return any(
+        key in metadata
+        for key in (
+            "purpose",
+            "source_checksum",
+            "source_format",
+            "usage_context",
+            "aliases",
+            "key_concepts",
+            "related_fields",
+            "related_metadata",
+            "business_rules",
+        )
+    )
+
+
+def _weighted_terms(metadata: dict[str, Any], body: str) -> list[str]:
+    terms: list[str] = []
+    for key in (
+        "title",
+        "purpose",
+        "domain",
+        "usage_context",
+        "tags",
+        "aliases",
+        "key_concepts",
+        "keywords",
+        "related_objects",
+        "related_fields",
+        "related_config_objects",
+        "related_metadata",
+        "related_processes",
+        "integration_points",
+        "dependencies",
+        "business_rules",
+    ):
+        value = metadata.get(key)
+        if isinstance(value, list):
+            terms.extend(str(item) for item in value if str(item).strip())
+        elif value:
+            terms.append(str(value))
+    for heading in _headings(body):
+        terms.append(heading)
+    seen: set[str] = set()
+    out: list[str] = []
+    for term in terms:
+        clean = normalize_whitespace(term)
+        key = clean.lower()
+        if clean and key not in seen:
+            seen.add(key)
+            out.append(clean)
+    return out
 
 
 def _section_aware_excerpt(body: str, max_chars: int) -> str:
@@ -316,8 +411,11 @@ def _render_index_yaml(records: list[dict[str, Any]], knowledge_root: Path, know
             lines.append(f"        last_reviewed: {_yaml_string(record.get('last_reviewed'))}")
             lines.append(f"        source_type: {_yaml_string(record.get('source_type'))}")
             lines.append(f"        related_objects: {_yaml_flow_list(record.get('related_objects'))}")
+            lines.append(f"        related_fields: {_yaml_flow_list(record.get('related_fields'))}")
             lines.append(f"        related_config_objects: {_yaml_flow_list(record.get('related_config_objects'))}")
+            lines.append(f"        related_metadata: {_yaml_flow_list(record.get('related_metadata'))}")
             lines.append(f"        related_processes: {_yaml_flow_list(record.get('related_processes'))}")
+            lines.append(f"        usage_context: {_yaml_flow_list(record.get('usage_context'))}")
             lines.append(f"        keywords: {_yaml_flow_list(record.get('keywords'))}")
             risk_flags = record.get("risk_flags") if isinstance(record.get("risk_flags"), list) else []
             if risk_flags:

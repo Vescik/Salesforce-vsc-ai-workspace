@@ -416,7 +416,9 @@ Use in VS Code with `/prompt-name` or attach in Copilot Chat.
 .\scripts\workspace.ps1 knowledge-sync -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
 .\scripts\workspace.ps1 knowledge-sync-dry-run -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
 .\scripts\workspace.ps1 knowledge-index
-.\scripts\workspace.ps1 knowledge-import -KnowledgeSource ".ai/knowledge/imports/note.txt" -KnowledgeDomain billing -KnowledgeTitle "Invoice Rules"
+.\scripts\workspace.ps1 knowledge-create -KnowledgeSource ".ai/knowledge/imports/note.txt" -KnowledgeDomain billing -KnowledgeTitle "Invoice Rules"
+.\scripts\workspace.ps1 knowledge-validate
+.\scripts\workspace.ps1 knowledge-graph
 .\scripts\workspace.ps1 knowledge-search -Query "invoice approval"
 .\scripts\workspace.ps1 knowledge-push-dry-run -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
 .\scripts\workspace.ps1 knowledge-push -KbRepo "https://github.com/Vescik/Salesforce-knowledge-base.git"
@@ -526,8 +528,10 @@ make knowledge-index
 # Search the KB
 make knowledge-search QUERY="billing schedule T&M"
 
-# Import a new note from a raw source file
-make knowledge-import KNOWLEDGE_SOURCE=.ai/knowledge/imports/new-notes.txt KNOWLEDGE_DOMAIN=billing KNOWLEDGE_TITLE="Credit Note Process"
+# Create new draft notes from a controlled source file
+make knowledge-create KNOWLEDGE_SOURCE=.ai/knowledge/imports/new-notes.txt KNOWLEDGE_DOMAIN=billing KNOWLEDGE_TITLE="Credit Note Process"
+make knowledge-validate
+make knowledge-graph
 # → Review generated draft in .ai/knowledge/domains/billing/
 # → Update status from "draft" to "reviewed" after human review
 ```

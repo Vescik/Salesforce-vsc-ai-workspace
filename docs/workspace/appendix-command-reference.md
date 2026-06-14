@@ -38,9 +38,16 @@ Commands are defined in `Makefile`. Commands marked "writes files" create or upd
 | `make knowledge-sync-dry-run KB_REPO=<repo>` | Preview KB sync. | Git repo access | Yes | Writes reports only. |
 | `make knowledge-sync KB_REPO=<repo>` | Sync curated KB notes. | Git repo access | Yes | Vendor clone ignored. |
 | `make knowledge-index` | Index KB notes. | No | Yes | Writes `knowledge-cards.jsonl`. |
-| `make knowledge-search QUERY="<topic>"` | Search KB cards. | No | No | Local index search. |
-| `make knowledge-import ...` | Convert controlled source to KB note. | No | Yes | No raw dumps/secrets. |
-| `make knowledge-import-manifest ...` | Import from manifest. | No | Yes | Uses local manifest. |
+| `make knowledge-create ...` | Convert controlled source to structured draft KB notes. | No | Yes | PDF/CSV/MD/TXT/XML; no raw dumps/secrets. |
+| `make knowledge-create-dry-run ...` | Preview source conversion without writing notes. | No | No | Writes no notes or reports. |
+| `make knowledge-create-manifest ...` | Create notes from manifest. | No | Yes | Uses local manifest. |
+| `make knowledge-import ...` | Backward-compatible alias for `knowledge-create`. | No | Yes | Kept for existing prompts/tasks. |
+| `make knowledge-import-manifest ...` | Backward-compatible alias for `knowledge-create-manifest`. | No | Yes | Kept for existing prompts/tasks. |
+| `make knowledge-validate` | Validate note schema, freshness, quality, secrets, and Salesforce IDs. | No | Yes | Writes validation reports. |
+| `make metadata-knowledge-index` | Build local metadata knowledge cards from `force-app`. | No | Yes | Local-only derived index. |
+| `make knowledge-index-yaml` | Emit machine-readable per-file KB index YAML. | No | Yes | Used by MCP slug lookup. |
+| `make knowledge-graph` | Build semantic KB graph. | No | Yes | Notes, source files, objects, fields, metadata, business rules. |
+| `make knowledge-search QUERY="<topic>"` | Search KB cards with BM25 and semantic fields. | No | No | Optional filters via `KNOWLEDGE_SEARCH_FLAGS`. |
 
 ## Context
 

@@ -43,10 +43,21 @@ IMPORTANT_KEYS = {
     # knowledge card fields
     "title",
     "keywords",
+    "weighted_terms",
+    "purpose",
+    "usage_context",
+    "tags",
+    "aliases",
+    "key_concepts",
     "domain",
     "related_objects",
+    "related_fields",
     "related_config_objects",
+    "related_metadata",
     "related_processes",
+    "integration_points",
+    "dependencies",
+    "business_rules",
     "summary",
 }
 
@@ -150,14 +161,14 @@ def search_jsonl(
     limit: int,
     *,
     mode: str = "legacy",
-    synonyms: dict[str, tuple[str, ...]] | None = None,
+    synonyms: dict[str, tuple[str, ...]] | bool | None = False,
     corpus_stats: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Search a JSONL file and return top matching records.
 
     Pass ``mode="bm25"`` for BM25 ranking (will lazy-build corpus stats from
-    ``path`` if ``corpus_stats`` is None). Pass ``synonyms`` (or rely on the
-    default ``.ai/config/search-synonyms.yaml``) to expand the query.
+    ``path`` if ``corpus_stats`` is None). Pass a synonym map or ``None`` to
+    expand the query from the default ``.ai/config/search-synonyms.yaml``.
     """
 
     if limit < 1:
@@ -168,7 +179,9 @@ def search_jsonl(
 
     expanded_query = _expand_query_lazy(query, synonyms)
     query_terms = tokenize(expanded_query)
-    stats = corpus_stats if corpus_stats is not None else (load_or_build_corpus_stats(source) if mode == "bm25" else None)
+    stats = corpus_stats if corpus_stats is not None else (
+        load_or_build_corpus_stats(source, cache_path=source.parent / "_search-stats.json") if mode == "bm25" else None
+    )
 
     records: list[dict[str, Any]] = []
     with source.open("r", encoding="utf-8") as handle:
@@ -295,7 +308,7 @@ def _safe_mtime(path: Path) -> int:
         return 0
 
 
-def _expand_query_lazy(query: str, synonyms: dict[str, tuple[str, ...]] | None) -> str:
+def _expand_query_lazy(query: str, synonyms: dict[str, tuple[str, ...]] | bool | None) -> str:
     if synonyms is False:  # type: ignore[comparison-overlap]
         return query
     from ai_workspace.search.synonyms import expand_query

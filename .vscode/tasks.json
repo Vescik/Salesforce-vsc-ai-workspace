@@ -269,6 +269,24 @@
       "problemMatcher": []
     },
     {
+      "label": "AI: Create Knowledge File",
+      "type": "shell",
+      "command": "make knowledge-create KNOWLEDGE_SOURCE=\"${input:knowledgeSource}\" KNOWLEDGE_DOMAIN=\"${input:knowledgeDomain}\" KNOWLEDGE_TITLE=\"${input:knowledgeTitle}\" KNOWLEDGE_OWNER=\"${input:knowledgeOwner}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-create -KnowledgeSource \"${input:knowledgeSource}\" -KnowledgeDomain \"${input:knowledgeDomain}\" -KnowledgeTitle \"${input:knowledgeTitle}\" -KnowledgeOwner \"${input:knowledgeOwner}\""
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Create Knowledge File Dry Run",
+      "type": "shell",
+      "command": "make knowledge-create-dry-run KNOWLEDGE_SOURCE=\"${input:knowledgeSource}\" KNOWLEDGE_DOMAIN=\"${input:knowledgeDomain}\" KNOWLEDGE_TITLE=\"${input:knowledgeTitle}\" KNOWLEDGE_OWNER=\"${input:knowledgeOwner}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-create-dry-run -KnowledgeSource \"${input:knowledgeSource}\" -KnowledgeDomain \"${input:knowledgeDomain}\" -KnowledgeTitle \"${input:knowledgeTitle}\" -KnowledgeOwner \"${input:knowledgeOwner}\""
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "AI: Import Knowledge Manifest",
       "type": "shell",
       "command": "make knowledge-import-manifest KNOWLEDGE_MANIFEST=\"${input:knowledgeManifest}\"",
@@ -278,11 +296,56 @@
       "problemMatcher": []
     },
     {
+      "label": "AI: Create Knowledge Manifest",
+      "type": "shell",
+      "command": "make knowledge-create-manifest KNOWLEDGE_MANIFEST=\"${input:knowledgeManifest}\"",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-create-manifest -KnowledgeManifest \"${input:knowledgeManifest}\""
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "AI: Index Knowledge Base",
       "type": "shell",
       "command": "make knowledge-index",
       "windows": {
         "command": ".\\scripts\\workspace.ps1 knowledge-index"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Validate Knowledge Base",
+      "type": "shell",
+      "command": "make knowledge-validate",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-validate"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Build Knowledge Index YAML",
+      "type": "shell",
+      "command": "make knowledge-index-yaml",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-index-yaml"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Build Metadata Knowledge Index",
+      "type": "shell",
+      "command": "make metadata-knowledge-index",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 metadata-knowledge-index"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AI: Build Knowledge Graph",
+      "type": "shell",
+      "command": "make knowledge-graph",
+      "windows": {
+        "command": ".\\scripts\\workspace.ps1 knowledge-graph"
       },
       "problemMatcher": []
     },
